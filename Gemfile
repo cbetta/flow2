@@ -22,3 +22,6 @@ gem 'sanitize'
 gem 'mandrill-api'
 gem 'public_suffix'
 
+group :development do
+  gem 'dotenv'
+end

@@ -1,32 +1,45 @@
-$fonts: "Droid Sans Mono", "Cousine", "Liberation Mono", "Source Code Pro", "Input Mono", Menlo, Consolas, "Ubuntu Mono";
+$theme_color: #c00;
+$text_color: #424242;
+$background_color: #f5f6f6;
+$background_color_header: $theme_color;
+
+$fonts: "Droid Sans Mono", "Cousine", "Liberation Mono", "Source Code Pro", "Input Mono", Menlo, Consolas, "Ubuntu Mono", monospace;
+$font_size: 16px;
+$line_height: 1.7em;
+$bold_weight: 500;
+
+$inner_width: 40em;
 
 BODY {
   font-family: $fonts;
-  font-size: 16px;
-  line-height: 1.7em;
-  color: #424242;
-  background-color: #f5f6f6;
+  font-size: $font_size;
+  line-height: $line_height;
+  color: $text_color;
+  background-color: $background_color;
   margin: 0; padding: 0;
 }
 
 H2 {
-  font-weight: 500;
+  font-weight: $bold_weight;
   color: #fff;
   font-size: 38px;
   line-height: 1.6em;
 }
 
-.top {
+A { color: $theme_color; }
+
+
+header.top {
   margin: 0; padding: 20px 0;
   width: 100%;
-  background-color: #cef;
-  background-color: #cc0000;
+  background-color: $background_color_header;
 }
 
 .inner {
-  max-width: 40em;
+  max-width: $inner_width;
   margin: 1em auto;
 }
+
 
 article.post {
   margin: 2em auto;
@@ -43,16 +56,9 @@ article.post {
     margin-left: -40px;
   }
   &.read {
+    transition: opacity 0.3s ease-out;
     opacity: 0.5;
-    &:hover {
-      opacity: 1.0;
-    }
-    /* color: #aaa;
-    STRONG { color: #c99; }
-    A {
-      color: #aaa;
-    } */
+    &:hover { opacity: 1.0; }
   }
 }
 
-A { text-decoration: underline; background-color: inherit; font-weight: normal; color: #c00; }

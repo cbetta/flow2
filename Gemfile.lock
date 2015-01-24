@@ -15,6 +15,7 @@ GEM
       execjs
     coffee-script-source (1.8.0)
     crass (1.0.1)
+    dotenv (1.0.2)
     excon (0.43.0)
     execjs (2.2.2)
     faraday (0.9.1)
@@ -109,6 +110,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  dotenv
   kramdown
   mandrill-api
   ohm

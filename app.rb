@@ -1,11 +1,19 @@
 require 'bundler/setup'
 Bundler.require
-
 require 'ohm'
 require 'sinatra/base'
 require 'sinatra/asset_pipeline'
 require 'rack/csrf'
 require 'sprockets-helpers'
+
+if development?
+  require 'dotenv'
+  Dotenv.load
+end
+
+use OmniAuth::Builder do
+  provider :github, ENV['GITHUB_KEY'], ENV['GITHUB_SECRET'], scope: 'user:email'
+end
 
 module Flow
   class App < Sinatra::Base
