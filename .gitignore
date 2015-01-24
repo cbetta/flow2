@@ -1,0 +1,11 @@
+notes.txt
+*.gem
+.sass-cache/
+.DS_Store
+.env
+.bundle
+lib/bundler/man
+pkg
+rdoc
+tmp
+public/assets
