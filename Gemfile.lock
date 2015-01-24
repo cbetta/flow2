@@ -1,5 +1,5 @@
 GIT
-  remote: git@github.com:sinatra/sinatra.git
+  remote: git://github.com/sinatra/sinatra.git
   revision: 62c4456bc735b7742daee6e1e232cb8b88d49a14
   specs:
     sinatra (1.4.5)
