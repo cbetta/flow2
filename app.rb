@@ -2,9 +2,11 @@ require 'bundler/setup'
 Bundler.require
 require 'ohm'
 require 'sinatra/base'
+require 'sinatra/reloader' if development?
 require 'sinatra/asset_pipeline'
 require 'rack/csrf'
 require 'sprockets-helpers'
+require 'time'
 
 if development?
   require 'dotenv'
@@ -15,12 +17,16 @@ use OmniAuth::Builder do
   provider :github, ENV['GITHUB_KEY'], ENV['GITHUB_SECRET'], scope: 'user:email'
 end
 
+require_relative 'models/user'
+require_relative 'models/post'
+require_relative 'models/comment'
+
 module Flow
   class App < Sinatra::Base
     register Sinatra::AssetPipeline
     set :sprockets, Sprockets::Environment.new(root)
     set :assets_prefix, '/assets'
-    set :digest_assets, false
+    set :digest_assets, production?
 
     configure do
       REDIS_URL = ENV["REDISCLOUD_URL"] || ENV["REDIS_URL"] || "redis://127.0.0.1:6379"
@@ -42,6 +48,8 @@ module Flow
         config.public_path = public_folder
         config.debug       = true if development?
       end
+
+      register Sinatra::Reloader if development?
     end
 
     helpers do
@@ -53,13 +61,35 @@ module Flow
     end
 
     before do
+      # Classes we might wish to set on the <body> tag
       @body_classes = []
     end
 
+    # Homepage
     get '/' do
       erb :index
     end
 
+    # Show an individual post's page
+    get '/p/:id' do
+      id = params[:id].split('-').first
+      erb id
+    end
+
+    # For compatibility with old flow sites
+    get '/items/:id' do
+      redirect %{/p/#{params[:id]}}
+    end
+
+    get '/users/:id' do
+      redirect %{/}
+    end
+
+    get '/signup' do
+      redirect %{/}
+    end
+
+    # If this is being run directly, let it serve the app up
     run! if app_file == $0
   end
 end

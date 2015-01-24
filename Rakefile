@@ -9,3 +9,9 @@ task :console do
   ARGV.clear
   IRB.start
 end
+
+desc "Import posts from a RubyFlow v1 file"
+task :import do
+  require_relative 'lib/import'
+  Flow::Import.import(ENV['database'])
+end

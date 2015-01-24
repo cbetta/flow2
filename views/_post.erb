@@ -1,0 +1,11 @@
+<% avatar = rand() > 0.5 %>
+<article class="post <%= "withavatar" if avatar %>" data-timestamp="<%= post.timestamp %>">
+  <% if avatar %>
+    <div class="avatar" style="background-image: url(<%= post.avatar %>)"></div>
+  <% end %>
+  <div class="body">
+    <h1><a href="<%= post.url %>"><%= post.title %></a></h1>
+    <p><%= post.content %></p>
+    <div class="metadata"><time><%= post.time %></time> <cite><%= post.author %></cite></div>
+  </div>
+</article>

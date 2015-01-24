@@ -1,16 +1,8 @@
 <section class="inner">
 
-  <article class="post">
-    <strong>Everybody dance now.</strong> Students at Princeton have <a href="https://freedom-to-tinker.com/blog/aylin/anonymous-programmers-can-be-identified-by-analyzing-coding-style/">figured out a way</a> to analyze coding styles and work out who wrote certain anonymous pieces of code.
-  </article>
-
-    <article class="post">
-    <strong>Everybody dance now.</strong> Students at Princeton have <a href="https://freedom-to-tinker.com/blog/aylin/anonymous-programmers-can-be-identified-by-analyzing-coding-style/">figured out a way</a> to analyze coding styles and work out who wrote certain anonymous pieces of code.
-  </article>
-
-    <article class="post read">
-    <strong>Everybody dance now.</strong> Students at Princeton have <a href="https://freedom-to-tinker.com/blog/aylin/anonymous-programmers-can-be-identified-by-analyzing-coding-style/">figured out a way</a> to analyze coding styles and work out who wrote certain anonymous pieces of code.
-  </article>
+  <% Post.all.each do |post| %>
+  <%= erb :_post, locals: { post: post } %>
+  <% end %>
 
 
 </section>

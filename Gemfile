@@ -4,6 +4,7 @@ ruby "2.2.0"
 gem 'unicorn'
 
 gem 'sinatra', github: 'sinatra/sinatra'
+gem 'sinatra-contrib'
 
 gem 'ohm'
 gem 'ohm-contrib'
@@ -24,4 +25,5 @@ gem 'public_suffix'
 
 group :development do
   gem 'dotenv'
+  gem 'sqlite3'
 end
