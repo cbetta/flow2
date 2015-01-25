@@ -1,8 +1,5 @@
-<section class="inner">
-
-  <% Post.all.each do |post| %>
-  <%= erb :_post, locals: { post: post } %>
-  <% end %>
-
-
+<section class="inner posts">
+	<%= erb :posts %>
 </section>
+
+<div id="loading">Loading older posts..</div>

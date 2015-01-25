@@ -1,0 +1,9 @@
+<div class="comment <%= "withavatar" if comment.avatar? %>" data-id="<%= comment.id %>" data-timestamp="<%= comment.timestamp %>">
+  <% if comment.avatar? %>
+    <div class="avatar" style="background-image: url(<%= comment.avatar_url %>)"></div>
+  <% end %>
+  <div class="body">
+    <div class="content"><%= comment.rendered_content %></div>
+    <div class="metadata"><% if comment.author %><cite><%= comment.author %></cite> &mdash; <% end %><time><%= comment.time %></time></div>
+  </div>
+</div>

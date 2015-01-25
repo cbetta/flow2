@@ -1,0 +1,7 @@
+<% @posts.each do |post| %>
+<%= erb :_post, locals: { post: post } %>
+<% end %>
+
+<div class="nextpage">
+	<a href="?page=<%= @page.to_i + 1 %>">Next page &raquo;</a>
+</div>

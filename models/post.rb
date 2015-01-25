@@ -4,6 +4,7 @@ class Post < Ohm::Model
 
   attribute :uid
   index :uid
+
   attribute :slug
   attribute :title
   attribute :content
@@ -15,6 +16,7 @@ class Post < Ohm::Model
 
   def before_create
     self.created_at = Time.now
+    self.metadata ||= {}
   end
 
   def timestamp
@@ -22,20 +24,44 @@ class Post < Ohm::Model
   end
 
   def time
-    self.created_at.strftime("%B %e %Y")
+    Kronic.format(self.created_at) #.strftime("%B %e %Y")
   end
 
   def author
     self.user ? self.user.username : self.byline ? self.byline : 'Anon'
   end
 
-  def avatar
-    return "http://www.gravatar.com/avatar.php?gravatar_id=8e2b996de3842c6ef7e68a82fa5f01f5&size=54"
+  def avatar_url
     self.user && self.user.avatar
   end
 
+  def avatar?; avatar_url end
+
   def url
     "/p/" + self.uid + "-" + self.rendered_slug
+  end
+
+  def lead_content
+    content = rendered_content.dup
+
+    # If formed of paragraphs or DIVs, get the first one
+    if content =~ /\<(p|div)\>/i
+      content = Nokogiri::HTML(content).css($1).first.to_s
+    else
+      # Otherwise, allow anything up until a forced newline
+      content = content.split(/\<br|\n\n|\r\n\r\n/i).first
+    end
+
+    Sanitize.fragment(content, elements: %w{a em strong b}, attributes: { 'a' => %w{href title} })
+  end
+
+  def description
+    Sanitize.fragment(lead_content).gsub(/[^A-Za-z0-9 '-.,?_+"]/, '').gsub(/\s+/, ' ').strip
+  end
+
+  def rendered_content
+    content = Kramdown::Document.new(self.content).to_html
+    Sanitize.fragment(content, elements: OKAY_ELEMENTS, attributes: { 'a' => %w{href title} })
   end
 
   def rendered_slug
@@ -45,7 +71,8 @@ class Post < Ohm::Model
                     .downcase
                     .gsub(/\P{ASCII}/, '')
                     .gsub(/\s+/, '-')
-                    .gsub(/[^a-z0-9\-]/, '')[0,60]
+                    .gsub(/[^a-z0-9\-]/, '')
+                    .gsub(/-+/, '-')[0,80]
     self.save
 
     return self.slug
