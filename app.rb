@@ -21,6 +21,7 @@ require_relative 'models/user'
 require_relative 'models/post'
 require_relative 'models/comment'
 
+require_relative 'config/redis'
 require_relative 'config/aws'
 require_relative 'lib/mirror_image'
 
@@ -38,10 +39,6 @@ end
 module Flow
   class App < Sinatra::Base
     configure do
-      p ENV["REDISCLOUD_URL"]
-      p ENV["REDIS_URL"]
-      Ohm.redis = Redic.new(ENV["REDISCLOUD_URL"] || ENV["REDIS_URL"] || "redis://127.0.0.1:6379")
-
       use Rack::Session::Cookie,
                      :key => 'flow.session',
                      :path => '/',
