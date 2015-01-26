@@ -28,8 +28,9 @@ gem 'fastimage'
 gem 'aws-sdk'
 gem 'kronic'
 
+gem 'sqlite3'  # for doing data imports
+
 group :development do
   gem 'dotenv'
-  gem 'sqlite3'
   gem 'rack-test'
 end
