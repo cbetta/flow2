@@ -14,7 +14,7 @@ module RateLimiter
 
   def rate_limit(key = :default, requests: 3, within: 240)
     # No rate limiting in development mode
-    return true if settings.development?
+    return if settings.development?
 
     halt 429 unless within_rate_limit(key, requests: requests, within: within)
   end

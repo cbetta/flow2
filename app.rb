@@ -112,7 +112,7 @@ module Flow
     get '/' do
       redirect '/rss', 301 if params[:format].to_s == 'rss'    # Compatibility with older flow sites
 
-      rate_limit requests: 10, within: 60
+      rate_limit requests: 30, within: 40
 
       @body_classes << 'index'
       determine_page
@@ -133,7 +133,7 @@ module Flow
 
     # Show an individual post's page
     get '/p/:id' do
-      rate_limit requests: 20, within: 30
+      rate_limit requests: 30, within: 40
 
       id = params[:id].split('-').first
       @body_classes << 'post'
