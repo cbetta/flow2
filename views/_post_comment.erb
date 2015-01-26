@@ -1,0 +1,13 @@
+<div id="postcomment" class="postbox <%= 'noavatar' if !with_avatar %>">
+	<div class="avatar" <% if with_avatar %>style="background-image: url(<%= current_user.avatar_url %>)"<% end %>></div>
+
+	<form method="post" id="post_comment" name="post_comment" action="/comment">
+		<input type="hidden" name="post_id" value="<%= @post.uid %>" />
+		<textarea name="content" required rows="4" cols="90" maxlength="4096" class="content" placeholder="What do you want to say?"></textarea>
+		<div class="help">You can use basic HTML markup (e.g. &lt;a&gt;) or Markdown.</div>
+		<div class="right">
+			<button type="submit" class="submit comment"><%= logged_in? ? "Post" : "Authenticate with " + AUTH_PROVIDER %></button>
+			<% unless logged_in? %><br>As you are not logged in, you will be<br>directed via <%= AUTH_PROVIDER %> to signup or sign in<% end %>
+		</div>
+	</form>
+</div>

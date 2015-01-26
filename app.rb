@@ -2,8 +2,9 @@ require 'bundler/setup'
 Bundler.require
 
 require 'ohm'
+require 'sass'
 require 'sinatra/base'
-require 'sinatra/reloader' if development?
+#require 'sinatra/reloader' if development?
 require 'sinatra/asset_pipeline'
 require 'rack/csrf'
 require 'sprockets-helpers'
@@ -16,10 +17,6 @@ if development?
   Dotenv.load
 end
 
-use OmniAuth::Builder do
-  provider :github, ENV['GITHUB_KEY'], ENV['GITHUB_SECRET'], scope: 'user:email'
-end
-
 require_relative 'models/user'
 require_relative 'models/post'
 require_relative 'models/comment'
@@ -27,7 +24,16 @@ require_relative 'models/comment'
 require_relative 'config/aws'
 require_relative 'lib/mirror_image'
 
-OKAY_ELEMENTS = %w{a em strong b br li ul ol}
+AUTH_PROVIDER = ENV['AUTH_PROVIDER'] || "GitHub"
+POST_ELEMENTS = %w{a em strong b br li ul ol p code tt samp}
+COMMENT_ELEMENTS = POST_ELEMENTS + %w{img}
+ABOUT_PAGE_PRESENT = Post.find(uid: 'about').first
+
+use OmniAuth::Builder do
+  provider :github, ENV['GITHUB_KEY'], ENV['GITHUB_SECRET'], scope: 'user:email' if AUTH_PROVIDER.downcase == 'github'
+  provider :twitter, ENV['TWITTER_KEY'], ENV['TWITTER_SECRET'], scope: 'user:email' if AUTH_PROVIDER.downcase == 'twitter'
+end
+
 
 module Flow
   class App < Sinatra::Base
@@ -61,9 +67,9 @@ module Flow
         config.debug       = true if development?
       end
 
-      register Sinatra::Reloader if development?
+      #register Sinatra::Reloader if development?
 
-      POSTS_PER_PAGE = ENV['POSTS_PER_PAGE'] || 10
+      POSTS_PER_PAGE = ENV['POSTS_PER_PAGE'] || 25
     end
 
     helpers do
@@ -77,6 +83,8 @@ module Flow
         session[:logged_in] && User[session[:logged_in]]
       end
 
+      def logged_in?; current_user end
+
       def determine_page
         @offset = 0
         @page = 1
@@ -85,6 +93,14 @@ module Flow
           @page = params[:page].to_i
           @offset = (@page - 1) * POSTS_PER_PAGE
         end
+      end
+
+      def internal_visitor?
+        request.referer && request.referer.include?(request.host)
+      end
+
+      def with_avatar
+        current_user && current_user.avatar?
       end
     end
 
@@ -134,9 +150,64 @@ module Flow
       redirect '/'
     end
 
+    post '/post' do
+      if logged_in?
+        post = Post.new
+        post.title = params[:title]
+        post.user = current_user
+        post.content = params[:content]
+
+        unless post.valid?
+          content_type :json
+          halt erb({ errors: post.errors }.to_json, layout: false)
+        end
+
+        post.save
+        if request.xhr?
+          content_type :json
+          erb({ redirect_to_post: post.url }.to_json, layout: false)
+        else
+          redirect post.url
+        end
+      else
+        content_type :json
+        session[:return_to] = ENV['BASE_URL'] + "#submitform"
+        erb({ redirect_to_oauth: AUTH_PROVIDER.downcase }.to_json, layout: false)
+      end
+    end
+
+    post '/comment' do
+      post = Post.find(uid: params[:post_id]).first
+      halt 400 unless post
+
+      if logged_in?
+        comment = Comment.new
+        comment.user = current_user
+        comment.post = post
+        comment.content = params[:content]
+
+        unless comment.valid?
+          content_type :json
+          halt erb({ errors: comment.errors }.to_json, layout: false)
+        end
+
+        comment.save
+
+        if request.xhr?
+          content_type :json
+          erb({ redirect_to_post: comment.post.url, comment_id: comment.id }.to_json, layout: false)
+        else
+          redirect comment.post.url + "#comment-" + comment.id
+        end
+      else
+        content_type :json
+        session[:return_to] = post.url + "#postcomment"
+        erb({ redirect_to_oauth: AUTH_PROVIDER.downcase }.to_json, layout: false)
+      end
+    end
 
     # OmniAuth callback
-    get '/auth/github/callback' do
+    get '/auth/' + AUTH_PROVIDER.downcase + '/callback' do
       r = request.env['omniauth.auth']
 
       halt 401 unless r.is_a?(Hash)
@@ -174,8 +245,9 @@ module Flow
       end
 
       flash[:notice] = "You are now logged in"
+      flash[:oauth_successful] = true
 
-      redirect '/'
+      redirect session[:return_to] || '/'
     end
 
     get '/auth/failure' do

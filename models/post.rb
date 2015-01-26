@@ -2,6 +2,9 @@ class Post < Ohm::Model
   include Ohm::DataTypes
   include Ohm::Callbacks
 
+  MIN_LENGTH = 10
+  MAX_LENGTH = 10000
+
   attribute :uid
   index :uid
 
@@ -17,6 +20,17 @@ class Post < Ohm::Model
   def before_create
     self.created_at = Time.now
     self.metadata ||= {}
+    self.uid ||= self.class.generate_unique_id
+  end
+
+  def self.generate_unique_id(length = 6)
+    max = 36 ** length - 1        # e.g. "zzzzzz" in base 36
+    min = 36 ** (length - 1)      # e.g. "100000" in base 36
+
+    loop do
+      uid = (SecureRandom.random_number(max - min) + min).to_s(36)
+      return uid unless find(uid: uid).first
+    end
   end
 
   def timestamp
@@ -24,7 +38,7 @@ class Post < Ohm::Model
   end
 
   def time
-    Kronic.format(self.created_at) #.strftime("%B %e %Y")
+    Kronic.format(self.created_at)
   end
 
   def author
@@ -52,7 +66,31 @@ class Post < Ohm::Model
       content = content.split(/\<br|\n\n|\r\n\r\n/i).first
     end
 
-    Sanitize.fragment(content, elements: %w{a em strong b}, attributes: { 'a' => %w{href title} })
+    cleaned = Sanitize.fragment(content, elements: %w{a em strong b}, attributes: { 'a' => %w{href title} })
+
+    if !self.user || !self.user.approved
+      doc = Nokogiri::HTML::fragment(cleaned)
+      doc.css('a').each { |link| link['rel'] = 'nofollow' }
+      cleaned = doc.to_html
+    end
+
+    return cleaned
+  end
+
+  def approved_user?
+    self.user && self.user.approved
+  end
+
+  def truncated?
+    content = rendered_content.dup
+
+    if content =~ /\<(p|div)\>/i
+      return true if Nokogiri::HTML(content).css($1).length > 1
+    else
+      return true if content.split(/\<br|\n\n|\r\n\r\n/i).length > 1
+    end
+
+    return false
   end
 
   def description
@@ -60,8 +98,13 @@ class Post < Ohm::Model
   end
 
   def rendered_content
+    return '' unless self.content
     content = Kramdown::Document.new(self.content).to_html
-    Sanitize.fragment(content, elements: OKAY_ELEMENTS, attributes: { 'a' => %w{href title} })
+    Sanitize.fragment(content, elements: POST_ELEMENTS, attributes: { 'a' => %w{href title} })
+  end
+
+  def comments?
+    self.comments && !self.comments.empty?
   end
 
   def rendered_slug
@@ -78,5 +121,28 @@ class Post < Ohm::Model
     return self.slug
   rescue
     ''
+  end
+
+  def valid?
+    if self.content
+      errors << ['content', "Post is too short (#{MIN_LENGTH} chars min)"] if self.content.to_s.length < MIN_LENGTH
+      errors << ['content', "Post is too long (#{MAX_LENGTH} chars max)"] if self.content.to_s.length > MAX_LENGTH
+      errors << ['content', "Post doesn't contain any links"] if self.rendered_content !~ /<a /i
+    else
+      errors << ['content', "No post body present"]
+    end
+
+    if self.title
+      errors << ['title', "Title is too short"] if self.title.to_s.length < 6
+      errors << ['title', "Title is too long"] if self.title.to_s.length > 85
+    else
+      errors << ['title', "No title present"]
+    end
+
+    errors.length == 0
+  end
+
+  def errors
+    @errors ||= []
   end
 end

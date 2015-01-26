@@ -1,4 +1,4 @@
-<div class="comment <%= "withavatar" if comment.avatar? %>" data-id="<%= comment.id %>" data-timestamp="<%= comment.timestamp %>">
+<div class="comment <%= "withavatar" if comment.avatar? %>" id="comment-<%= comment.id %>" data-id="<%= comment.id %>" data-timestamp="<%= comment.timestamp %>">
   <% if comment.avatar? %>
     <div class="avatar" style="background-image: url(<%= comment.avatar_url %>)"></div>
   <% end %>

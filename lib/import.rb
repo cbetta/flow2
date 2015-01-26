@@ -5,6 +5,15 @@ module Flow
     module_function
 
     def import(file)
+      # Import from the Web
+      t = nil
+      if file.start_with?('http')
+        require 'open-uri'
+        t = Tempfile.new('db')
+        t.write open(file).read
+        file = t.path
+      end
+
       $db = SQLite3::Database.new file
       $db.results_as_hash = true
       $users = {}
@@ -12,6 +21,8 @@ module Flow
       import_users
       import_posts
       import_comments
+
+      t.unlink if t
     end
 
     def import_users
@@ -21,8 +32,8 @@ module Flow
         u.username = row['login']
         u.email = row['email']
         u.set_metadata url: row['url'], crypted_password: row['crypted_password'], salt: row['salt']
-        u.set_metadata admin: true if row['admin'] == '1'
-        u.approved = row['approved_for_feed'] == '1'
+        u.set_metadata admin: true if row['admin'] == 1
+        u.approved = row['approved_for_feed'] == 1
         u.save
         u.created_at = row['created_at']
         u.save

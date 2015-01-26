@@ -12,10 +12,11 @@ gem 'ohm-contrib'
 gem 'omniauth'
 gem 'omniauth-github'
 
+gem 'sass'
 gem 'sinatra-asset-pipeline'
 gem 'rack-flash3'
 gem 'rack_csrf'
-gem 'sass', require: 'sass'
+
 
 gem 'kramdown'
 gem 'nokogiri'

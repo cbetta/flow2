@@ -15,3 +15,8 @@ task :import do
   require_relative 'lib/import'
   Flow::Import.import(ENV['database'])
 end
+
+desc "Delete all data"
+task :reset do
+	[Post,Comment,User].each { |k| k.all.each { |p| p.delete } }
+end

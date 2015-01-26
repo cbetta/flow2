@@ -1,5 +1,14 @@
+<%= erb :_site_description unless internal_visitor? %>
+
+<div id="submitform">
+	<div class="inner">
+		<h2>Submit a post</h2>
+		<%= erb :_post_post %>
+	</div>
+</div>
+
 <section class="inner posts">
 	<%= erb :posts %>
 </section>
 
-<div id="loading">Loading older posts..</div>
+<div id="loading"><i class="fa fa-spinner fa-pulse"></i> Loading older posts <i class="fa fa-spinner fa-pulse"></i></div>

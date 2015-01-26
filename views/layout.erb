@@ -2,18 +2,31 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0" />
   <title><%= @page_title ? @page_title + " - " + ENV['SITE_NAME'] : ENV['SITE_NAME'] %></title>
   <meta name="description" content="<%= @post ? @post.description : ENV['SITE_DESCRIPTION'] %>">
   <%= stylesheet_tag 'app' %>
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
   <%= Rack::Csrf.metatag(env) %>
   <link rel="alternate" type="application/rss+xml" title="Feed" href="<%= ENV['BASE_URL'] %>/rss">
-  <script src="//use.typekit.net/cap5cqx.js"></script><script>try{Typekit.load();}catch(e){}</script>  
+  <script src="//use.typekit.net/cap5cqx.js"></script><script>try{Typekit.load();}catch(e){}</script>
 </head>
-<body class="<%= @body_classes.join(' ') %>">
+<body class="<%= @body_classes.join(' ') %> <%= 'oauth-successful' if flash[:oauth_successful] %>">
   <header class="top">
     <div class="inner">
-      <h1><a href="/">RubyFlow</a> <span>the ruby community blog</span></h1>
+      <div class="menu">
+        <ul>
+          <% if logged_in? %>
+            <li><div class="avatar small" style="background-image: url(<%= current_user.avatar_url %>)"></div></li>
+            <li><a href="/logout" title="Sign out"><i class="fa fa-sign-out"></i><span class="optional">Sign out</span></a></li>
+          <% end %>
+          <li><a href="/rss" title="RSS feed"><i class="fa fa-rss"></i><span class="optional">RSS</span></a></li>
+          <% if ENV['TWITTER_USERNAME'] %><li><a href="https://twitter.com/<%= ENV['TWITTER_USERNAME'] %>" title="Twitter"><i class="fa fa-twitter"></i><span class="optional">Twitter</span></a></li><% end %>
+          <% if ABOUT_PAGE_PRESENT %><li><a href="/p/about" title="About"><i class="fa fa-question"></i><span class="optional">About</span></a></li><% end %>
+          <li><a href="#" class="submit" title="Submit a post"><i class="fa fa-plus"></i><span class="optional">Submit</span></a></li>
+        </ul>
+      </div>
+      <h1><a href="/" title="Homepage"><%= ENV['SITE_NAME'] %></a> <span><%= ENV['SITE_DESCRIPTION'] %></span></h1>
     </div>
   </header>
 
@@ -36,6 +49,7 @@
       document.write(unescape("%3Cscript src='/assets/jquery-2.1.3.min.js' type='text/  javascript'%3E%3C/script%3E"))
     };
   </script>
+  <%= javascript_tag 'sisyphus.min.js' %>
   <%= javascript_tag 'app' %>
 </body>
 </html>

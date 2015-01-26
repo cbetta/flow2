@@ -6,9 +6,10 @@ $background_color_header: $theme_color;
 $fonts_headers: "proxima-nova", ubuntu, "helvetica neue", helvetica, sans-serif;
 $fonts: $fonts_headers, "Droid Sans Mono", "Cousinex", "Liberation Monox", "Source Code Prox", "Input Monox", Menlo, Consolas, "Ubuntu Mono", monospace;
 $font_size: 16px;
-$line_height: 1.5em;
+$line_height: 1.4em;
 $bold_weight: 600;
 
+$top_padding: 84px;
 $inner_width: 50em;
 $avatar_size: 48px;
 $post_padding: $avatar_size / 1.5;
@@ -19,7 +20,7 @@ BODY {
   line-height: $line_height;
   color: $text_color;
   background-color: $background_color;
-  margin: 0; padding: 0;
+  margin: $top_padding 0;
 }
 
 H1, H2, H3 {
@@ -27,52 +28,82 @@ H1, H2, H3 {
   font-family: $fonts_headers;
 }
 
-HEADER.top {
-  margin: 0; padding: 10px 0;
-  width: 100%;
-  background-color: $background_color_header;
-
-  A { color: inherit; text-decoration: none }
-
-  H1 {
-    color: #fff;
-    font-size: 38px;
-    line-height: 1.3em;
-    margin-bottom: 0;
-    font-weight: 500;
-    SPAN {
-      font-size: 20px;
-      display: block;
-      margin-top: 0;
-      padding: 0;
-    }
-    A:hover {
-      background-color: #fff;
-      color: $background_color_header;
-      padding: 8px 16px;
-      margin-left: -16px;
-    }
-  }
-
-  BODY.fix-header & {
-    position: fixed;
-    top: 0px;
-    height: 50px;
-    H1 { font-size: 20px; SPAN { display: none; }}
-  }
-}
-
-BODY.fix-header {
-  padding-top: 160px;
-}
+H3 { font-size: 1.3em; }
 
 A { color: $theme_color; }
 
 .inner {
   max-width: $inner_width;
   min-width: 20em;
-  margin: 1em auto;
-  padding: 0 1em;
+  margin: 18px auto;
+  padding: 0 12px;
+}
+
+HEADER.top {
+  position: fixed;
+  padding: 0;
+  top: 0px;
+  z-index: 100;
+  width: 100%;
+  background-color: $background_color_header;
+  border-bottom: 1px solid #800;
+
+  .inner { margin-top: 14px; margin-bottom: 14px; padding-right: 0; }
+
+  .menu {
+    font-size: 1.2em;
+    .optional { margin-left: 0.4em; }
+    UL { list-style-type: none; padding: 0; }
+    LI { float: right; padding: 0; }
+    A {
+      color: #fff;
+      padding: 0px 16px;
+    }
+    .avatar {
+      margin-right: 12px;
+    }
+  }
+
+  A { color: inherit; text-decoration: none; }
+
+  H1 {
+    margin: 0;
+    font-size: 24px;
+    line-height: 22px;
+    SPAN { display: none; }
+    color: #fff;
+    font-weight: $bold_weight;
+    A:hover { margin-left: -8px; }
+  }
+  A:hover {
+    background-color: #fff;
+    color: $background_color_header;
+    padding: 12px 8px 8px;
+    margin-left: 8px;
+    margin-right: 8px;
+  }
+}
+
+.avatar {
+  float: left;
+  width: $avatar_size;
+  height: $avatar_size;
+  border-radius: 50%;
+  border: 0px solid transparent;
+  margin-bottom: 8px;
+  background-size: cover;
+  //-webkit-filter: grayscale(50%) opacity(0.5);
+  &.approved {
+    //-webkit-filter: none;
+    //border: 2px solid #c66;
+    //margin-left: -2px;
+    //margin-top: -2px;
+    //box-shadow: 0px 0px 8px #ff0;
+  }
+  &.small {
+    width: 22px;
+    height: 22px;
+  }
 }
 
 
@@ -80,6 +111,18 @@ ARTICLE.post {
   margin: 2.4em auto;
   padding-left: $post_padding;
   padding-left: 0;
+
+  .more {
+    color: #999;
+    display: inline;
+    font-size: 0.8em;
+    text-transform: uppercase;
+    &.comment A {
+      font-size: 0.9em;
+    }
+  }
+
+
 
   &.read {
     transition: opacity 0.3s ease-out;
@@ -94,24 +137,25 @@ ARTICLE.post {
     vertical-align: baseline;
     font-family: $fonts_headers;
     font-weight: $bold_weight;
-    background-color: #fdd;
     color: #c00;
     padding: 0px 7px 0px;
     font-size: 1.3em;
     line-height: 1.2em;
     margin-bottom: 4px;
     margin-left: -$post_padding;
-
-    //display: inline;
-    background-color: #ffd;
-    background: #fdd;
     color: $text_color;
     margin-right: 4px;
+    orphans: 3;
     A {
       text-decoration: none;
+      color: #222;
+      &:visited {
+        color: #999;
+      }
       &:hover {
-        background-color: #fcc;
+        //background-color: #fcc;
         color: #c00 !important;
+        text-decoration: underline;
       }
     }
 
@@ -119,7 +163,6 @@ ARTICLE.post {
 
   P { margin: 0 }
 
-  .body, .comments { margin-left: $avatar_size + $post_padding + 16px; }
   .body, .comments { margin-left: $avatar_size + 16px; }
   H1 { margin-left: 0; padding: 0; }
 
@@ -127,14 +170,7 @@ ARTICLE.post {
     //padding-left: 0;
   }
 
-  .avatar {
-    float: left;
-    width: $avatar_size;
-    height: $avatar_size;
-    border: 1px solid #ccc;
-    margin-bottom: 8px;
-    background-size: cover;
-  }
+
 
   .metadata {
     color: #bbb;
@@ -144,7 +180,7 @@ ARTICLE.post {
     CITE {
       color: #666;
     }
-    margin-top: 3px;
+    margin-top: 4px;
   }
 
   .comment.inline {
@@ -160,10 +196,18 @@ ARTICLE.post {
 SECTION.comments {
   .comment {
     margin-bottom: 2em;
+    .content { background-color: #fff; padding: 0.2em 1em; }
   }
 }
 
+SECTION.posts {
+  margin-top: -28px;
+}
+
 BODY.post ARTICLE.post {
+  p {
+    margin: 1em 0;
+  }
   h1 {
     background-color: inherit;
     display: block;
@@ -180,7 +224,7 @@ BODY.post ARTICLE.post {
       font-size: 1.1em;
       line-height: $line_height;
     }
-    
+
   }
   .metadata {
       font-size: 0.9em;
@@ -191,29 +235,48 @@ BODY.post ARTICLE.post {
     .avatar { display: none; }
     .comment.withavatar .avatar { display: block; }
   }
-
-  //.avatar { background-color: #eee; }
 }
 
-@media screen and (max-width: 640px) {
-  BODY.post ARTICLE.post, article.post {
-    padding-left: 0;
-    h1 { margin-left: 0px; }
-    .avatar { display: none; }
-    .body, .comments { margin-left: 0px; }
+#sitedescription {
+  text-align: center;
+  margin-bottom: 8px;
+  .inner {
+    display: inline-block;
+    margin-top: 0px;
   }
-  BODY.index ARTICLE.post {
-    h1 {
-      display: block;
-      background-color: inherit;
-      A { color: #222; font-weight: bold; }
-    }
+  h2 {
+    margin: 0;
+    font-weight: normal;
+    font-size: 2.0em;
+    line-height: $line_height;
+    color: #666;
+  }
+  &:before {
+    content: "";
   }
 }
 
-BODY.index ARTICLE.post H1 {
-      background-color: inherit;
-      A { color: #222; font-weight: bold; }
+.postbox {
+  &.noavatar {
+    .avatar { border: 1px dashed #aaa; }
+  }
+}
+
+#submitform {
+  display: none;
+  margin-bottom: 48px;
+  .inner {
+    background-color: #eee;
+    padding-top: 1em;
+    padding-bottom: 1em;
+    //border-radius: 10px;
+    border: 1px solid #ccc;
+    padding-left: 1.2em;
+    padding-right: 1.2em;
+  }
+  h2 {
+    margin-top: 8px;
+  }
 }
 
 #loading {
@@ -224,4 +287,163 @@ BODY.index ARTICLE.post H1 {
   font-size: 24px;
   font-family: $fonts_headers;
   text-align: center;
+}
+
+H3.divider {
+  color: #aaa;
+  font-size: 1.0em;
+  padding: 9px 0 8px;
+  border-top: 1px solid #e9e9e9;
+  border-bottom: 1px solid #e9e9e9;
+  padding-left: 12px;
+  font-weight: normal;
+  background-color: #eee;
+  text-align: left;
+  text-transform: uppercase;
+  margin-top: 24px;
+  margin-left: -12px;
+  margin-right: -12px;
+  margin-bottom: -18px;
+  font-weight: bold;
+}
+
+@-moz-keyframes pulsing {
+  from { background-color: #c00; }
+  50% { background-color: #f60; }
+  to { background-color: #c00; }
+}
+
+@-webkit-keyframes pulsing {
+  from { background-color: #c00; }
+  50% { background-color: #f60; }
+  to { background-color: #c00; }
+}
+
+@keyframes pulsing {
+  from { background-color: #c00; }
+  50% { background-color: #f60; }
+  to { background-color: #c00; }
+}
+
+@-moz-keyframes flashcomment {
+  from { background-color: #fff; }
+  50% { background-color: #ff9; }
+  to { background-color: #fff; }
+}
+
+@-webkit-keyframes flashcomment {
+  from { background-color: #fff; }
+  50% { background-color: #ff9; }
+  to { background-color: #fff; }
+}
+
+@keyframes flashcomment {
+  from { background-color: #fff; }
+  50% { background-color: #ff9; }
+  to { background-color: #fff; }
+}
+
+.postbox {
+  .help {
+    float: left;
+  }
+  .help, .right, .error {
+    font-size: 0.9em;
+    color: #999;
+    line-height: 1.2em;
+    margin-bottom: 8px;
+  }
+  .error { color: #900; }
+  FORM {
+    margin-left: $avatar_size + 16px;
+    TEXTAREA {
+      min-height: 160px;
+    }
+    .errored { background-color: #fee; }
+    TEXTAREA, INPUT[type='text'] {
+      font-size: 1.1em;
+      max-width: 100%;
+      box-sizing: border-box;
+      padding: 8px;
+      margin-bottom: 8px;
+      font-family: $fonts;
+      display: block;
+      border: 1px solid #bbb;
+    }
+
+    INPUT.title {
+      font-weight: $bold_weight;
+      font-size: 1.2em;
+    }
+
+    BUTTON[type='submit'] {
+      cursor: pointer;
+      padding: 2px 24px;
+      font-size: 1.4em;
+      font-family: $fonts;
+      line-height: $line_height;
+      font-weight: normal;
+      background-color: $theme_color;
+      color: #fff;
+      border: 0;
+      border-radius: 12px;
+      margin-bottom: 8px;
+      BODY.oauth-successful & {
+        -moz-animation-name: pulsing;
+        -moz-animation-duration: 1s;
+        -moz-animation-iteration-count: infinite;
+        -webkit-animation-name: pulsing;
+        -webkit-animation-duration: 1s;
+        -webkit-animation-iteration-count: infinite;
+        animation-name: pulsing;
+        animation-duration: 1s;
+        animation-iteration-count: infinite;
+      }
+    }
+  }
+}
+
+.comment .flashing {
+  -moz-animation-name: flashcomment;
+  -moz-animation-duration: 1s;
+  -moz-animation-iteration-count: 4;
+  -webkit-animation-name: flashcomment;
+  -webkit-animation-duration: 1s;
+  -webkit-animation-iteration-count: 4;
+  animation-name: flashcomment;
+  animation-duration: 1s;
+  animation-iteration-count: 4;
+}
+
+.right {
+  display: block;
+  text-align: right;
+}
+
+@media screen and (max-width: 620px) {
+  .menu .optional { display: none; }
+
+  #submitform .inner { border-radius: 0; border-top: 1px solid #ccc; border-bottom: 1px solid #ccc; }
+
+  BODY.post ARTICLE.post, article.post {
+    padding-left: 0;
+    h1 { margin-left: 0px; }
+    .avatar { float: right; margin-left: 12px; }
+    .body, .comments { margin-left: 0px; }
+    .comments .body { margin-left: $avatar_size + 16px; }
+  }
+  SECTION.comments {
+    .avatar { float: left !important; margin-left: 0 !important; }
+  }
+  .postbox {
+    FORM { margin-left: 0; }
+    .avatar { display: none !important; }
+  }
+  BODY.index ARTICLE.post {
+    h1 {
+      display: block;
+      background-color: inherit;
+      A { color: #222; font-weight: bold; }
+    }
+  }
 }
