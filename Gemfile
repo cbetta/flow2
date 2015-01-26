@@ -17,7 +17,6 @@ gem 'sinatra-asset-pipeline'
 gem 'rack-flash3'
 gem 'rack_csrf'
 
-
 gem 'kramdown'
 gem 'nokogiri'
 gem 'builder'
@@ -28,9 +27,8 @@ gem 'fastimage'
 gem 'aws-sdk'
 gem 'kronic'
 
-gem 'sqlite3'  # for doing data imports
-
 group :development do
   gem 'dotenv'
   gem 'rack-test'
+  gem 'sqlite3'  # for doing data imports
 end

@@ -4,7 +4,6 @@ Bundler.require
 require 'ohm'
 require 'sass'
 require 'sinatra/base'
-#require 'sinatra/reloader' if development?
 require 'sinatra/asset_pipeline'
 require 'rack/csrf'
 require 'sprockets-helpers'
@@ -24,6 +23,7 @@ require_relative 'models/comment'
 require_relative 'config/redis'
 require_relative 'config/aws'
 require_relative 'lib/mirror_image'
+require_relative 'lib/rate_limiter'
 
 AUTH_PROVIDER = ENV['AUTH_PROVIDER'] || "GitHub"
 POST_ELEMENTS = %w{a em strong b br li ul ol p code tt samp}
@@ -67,13 +67,12 @@ module Flow
         config.debug       = true if development?
       end
 
-      #register Sinatra::Reloader if development?
-
       POSTS_PER_PAGE = ENV['POSTS_PER_PAGE'] || 25
     end
 
     helpers do
       include Sprockets::Helpers
+      include RateLimiter
 
       def h(text)
         Rack::Utils.escape_html(text)
@@ -113,6 +112,8 @@ module Flow
     get '/' do
       redirect '/rss', 301 if params[:format].to_s == 'rss'    # Compatibility with older flow sites
 
+      rate_limit requests: 10, within: 60
+
       @body_classes << 'index'
       determine_page
       @posts = Post.all.sort(order: 'DESC', limit: [@offset, POSTS_PER_PAGE])
@@ -132,6 +133,8 @@ module Flow
 
     # Show an individual post's page
     get '/p/:id' do
+      rate_limit requests: 20, within: 30
+
       id = params[:id].split('-').first
       @body_classes << 'post'
       @post = Post.find(uid: id).first
@@ -163,6 +166,12 @@ module Flow
         end
 
         post.save
+
+        unless within_rate_limit(:posting, requests: 1, within: 10)
+          content_type :json
+          halt erb({ errors: [['content', 'You have posted within the past five minutes']] }.to_json, layout: false)
+        end
+
         if request.xhr?
           content_type :json
           erb({ redirect_to_post: post.url }.to_json, layout: false)
@@ -192,6 +201,11 @@ module Flow
         end
 
         comment.save
+
+        unless within_rate_limit(:commenting, requests: 4, within: 120)
+          content_type :json
+          halt erb({ errors: [['content', 'Slow down the commenting a little']] }.to_json, layout: false)
+        end
 
         if request.xhr?
           content_type :json

@@ -27,7 +27,10 @@ module Flow
 
     def import_users
       puts "Import users"
+      i = 0
       $db.execute("SELECT * FROM users ORDER BY id ASC") do |row|
+        i += 1
+        puts i if i % 100 == 0
         u = User.new
         u.username = row['login']
         u.email = row['email']
@@ -43,7 +46,11 @@ module Flow
 
     def import_posts
       puts "Importing posts"
+      i = 0
       $db.execute("SELECT * FROM items ORDER BY id ASC") do |row|
+        i += 1
+        puts i if i % 100 == 0
+
         # id title content user_id created_at byline
         p = Post.new
         p.uid = row['id']
@@ -65,10 +72,14 @@ module Flow
 
     def import_comments
       puts "Importing comments"
+      i = 0
       $db.execute("SELECT * FROM comments ORDER BY id ASC") do |row|
+        i += 1
+        puts i if i % 100 == 0
+
         c = Comment.new
         c.content = row['content']
-        
+
         if row['user_id']
           c.user = $users[row['user_id']]
         else

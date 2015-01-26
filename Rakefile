@@ -18,5 +18,6 @@ end
 
 desc "Delete all data"
 task :reset do
-	[Post,Comment,User].each { |k| k.all.each { |p| p.delete } }
+	# [Post,Comment,User].each { |k| k.all.each { |p| p.delete } }
+  Ohm.redis.call "FLUSHDB"
 end
