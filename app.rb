@@ -38,6 +38,7 @@ end
 module Flow
   class App < Sinatra::Base
     configure do
+      Ohm.redis = Redic.new(ENV["REDISCLOUD_URL"] || ENV["REDIS_URL"] || "redis://127.0.0.1:6379")
 
       use Rack::Session::Cookie,
                      :key => 'flow.session',
