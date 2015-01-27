@@ -11,24 +11,25 @@ task :console do
   IRB.start
 end
 
-desc "Import posts from a RubyFlow v1 file"
+desc "Import posts from a Flow v1 SQLite database"
 task :import do
   require_relative 'lib/import'
   Flow::Import.import(ENV['database'], ENV['database_url'])
+  puts "Import complete"
 end
 
 desc "Delete all data in Redis"
 task :reset_redis do
-	puts "Are you REALLY SURE?"
-	gets
+	puts "Are you REALLY SURE? Ctrl+C now if not."
+	STDIN.gets
   Ohm.redis.call "FLUSHDB"
+  puts "Redis database flushed"
 end
 
 desc "Delete all data in the main Postgres database"
 task :reset_db do
-	puts "Are you REALLY SURE?"
-	gets
-	DB.run("TRUNCATE users CASCADE")
-	DB.run("TRUNCATE posts CASCADE")
-	DB.run("TRUNCATE comments CASCADE")
+	puts "Are you REALLY SURE? Ctrl+C now if not."
+	STDIN.gets
+	%w{users posts comments}.each { |model| DB.run("DROP TABLE #{model} CASCADE") }
+	puts "Tables dropped"
 end

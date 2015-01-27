@@ -1,8 +1,12 @@
-class Post < Sequel::Model(DB[:posts])
+class Post < Sequel::Model
+  include Concerns::Content
+  include Concerns::Validations
+
   CONTENT_LENGTH_RANGE = 10..10000
   TITLE_LENGTH_RANGE = 6..100
   POSTS_PER_PAGE = ENV['POSTS_PER_PAGE'] || 25
   ALLOWED_ELEMENTS = %w{a em strong b br li ul ol p code tt samp pre}
+  ALLOWED_ATTRIBUTES = { 'a' => %w{href title} }
 
   set_schema do
     primary_key :id
@@ -28,100 +32,94 @@ class Post < Sequel::Model(DB[:posts])
   many_to_one :user
   one_to_many :comments
 
-  def after_initialize
-    self.created_at ||= Time.now
-    self.metadata ||= Sequel.hstore({})
-    self.uid ||= self.class.generate_unique_id
+    # Are there enough posts to have a page 2, 3, 4, etc?
+  def self.is_there_a_page?(page)
+    Post.count > (page - 1) * POSTS_PER_PAGE
   end
 
+  # Return all recent visible items in reverse ID order
   def self.recent_from_offset(offset = 0)
-    where(visible: true).reverse_order(:id).limit(Post::POSTS_PER_PAGE).offset(offset).all
+    where(visible: true).reverse_order(:id).limit(POSTS_PER_PAGE).offset(offset)
   end
 
+  # Generate a unique ID (used instead of a number in URLs)
   def self.generate_unique_id(length = 6)
     max = 36 ** length - 1        # e.g. "zzzzzz" in base 36
     min = 36 ** (length - 1)      # e.g. "100000" in base 36
 
-    loop do
+    20.times do
+      # Generates a random number that when converted to base 36 will be between "100000" and "zzzzzz"
       uid = (SecureRandom.random_number(max - min) + min).to_s(36)
+
+      # Returns the new ID if no other post has it
       return uid unless find(uid: uid)
     end
   end
 
-  def timestamp
-    self.created_at.to_i
+
+  # Make sure every post has a unique ID (used in URLs)
+  def after_initialize
+    super
+    self.uid ||= self.class.generate_unique_id
   end
 
-  def time
-    Kronic.format(self.created_at)
-  end
-
-  def author
-    self.user ? self.user.display_name : self.byline ? self.byline : 'Anon'
-  end
-
-  def avatar_url
-    self.user && self.user.avatar
-  end
-
-  def avatar?; avatar_url end
-
+  # The post's URL relative to the base URL
   def url
     "/p/" + self.uid + "-" + self.rendered_slug
   end
 
-  def lead_content
+  # Break up the content into logical parts
+  def content_parts
     content = rendered_content.dup
 
     # If formed of paragraphs or DIVs, get the first one
     if content =~ /\<(p|div)\>/i
-      content = Nokogiri::HTML(content).css($1).first.to_s
+      content = Nokogiri::HTML(content).css($1)
     else
       # Otherwise, allow anything up until a forced newline
-      content = content.split(/\<br|\n\n|\r\n\r\n/i).first
+      content = content.split(/\<br|\n\n|\r\n\r\n/i)
     end
-
-    cleaned = Sanitize.fragment(content, elements: %w{a em strong b code}, attributes: { 'a' => %w{href title} })
-
-    if !self.user || !self.user.approved
-      doc = Nokogiri::HTML::fragment(cleaned)
-      doc.css('a').each { |link| link['rel'] = 'nofollow' }
-      cleaned = doc.to_html
-    end
-
-    return cleaned
   end
 
-  def approved_user?
-    self.user && self.user.approved
+  # The first paragraph or 'chunk' of the body, as suitable for a front page or abbreviated feed
+  def lead_content
+    content = content_parts.first.to_s
+
+    # Tighter restrictions on front page excerpts than elsewhere
+    content = Sanitize.fragment(content, elements: %w{a em strong b code}, attributes: ALLOWED_ATTRIBUTES)
+
+    # Change links to have rel='nofollow' (to help with spam) if it's from a non-approved user
+    content = Sanitize.nofollow_links(content) if !self.user || (!self.user.approved && !self.user.admin?)
+      
+    content
   end
 
-  def truncated?
-    content = rendered_content.dup
-
-    if content =~ /\<(p|div)\>/i
-      return true if Nokogiri::HTML(content).css($1).length > 1
-    else
-      return true if content.split(/\<br|\n\n|\r\n\r\n/i).length > 1
-    end
-
-    return false
+  def more_inside?
+    content_parts.length > 1
   end
 
   def description
     Sanitize.fragment(lead_content).gsub(/[^A-Za-z0-9 '-.,?_+"]/, '').gsub(/\s+/, ' ').strip
   end
 
+  # The post's content rendered from Markdown through to HTML and sanitized
   def rendered_content
     return '' unless self.content
     content = Kramdown::Document.new(self.content).to_html
-    Sanitize.fragment(content, elements: ALLOWED_ELEMENTS, attributes: { 'a' => %w{href title} })
+    cleaned = Sanitize.fragment(content, elements: ALLOWED_ELEMENTS, attributes: ALLOWED_ATTRIBUTES)
+
+    # Change links to have rel='nofollow' (to help with spam) if it's from a non-approved user
+    cleaned = Sanitize.nofollow_links(cleaned) if !self.user || (!self.user.approved && !self.user.admin?)
+
+    cleaned
   end
 
+  # Does this post have any comments on it?
   def comments?
     self.comments && !self.comments.empty?
   end
 
+  # Get or set the 'slug' that appears on the end of post URLs
   def rendered_slug
     return self.slug if self.slug
 
@@ -138,32 +136,18 @@ class Post < Sequel::Model(DB[:posts])
     ''
   end
 
-  def day_of_year
-    self.created_at.strftime("%j")
-  end
-
   def validate
     super
 
-    if self.content && self.content.is_a?(String)
-      errors.add(:content, 'Post is too short') if self.content.length < CONTENT_LENGTH_RANGE.min
-      errors.add(:content, 'Post is too long') if self.content.length > CONTENT_LENGTH_RANGE.max
-      if self.user && !self.user.admin? && self.rendered_content !~ /\<a /i
-        errors.add(:content, 'Your post contains no links')
-      end
-    else
-      errors.add(:content, 'No post body present')
+    presence_of :content
+    length_of :content, in: CONTENT_LENGTH_RANGE
+
+    # If it's not an approved user, the post needs to contain at least one link
+    unless self.approved_user? || self.rendered_content =~ /\<a /i
+      errors.add(:content, 'Your post contains no links')
     end
 
-    if self.title && self.title.is_a?(String)
-      errors.add(:title, 'Title is too short') if self.title.length < TITLE_LENGTH_RANGE.min
-      errors.add(:title, 'Title is too long') if self.title.length > TITLE_LENGTH_RANGE.max
-    else
-      errors.add(:title, 'Title is not present')
-    end
-  end
-
-  def self.is_there_a_page?(page)
-    Post.count > (page - 1) * POSTS_PER_PAGE
+    presence_of :title
+    length_of :title, in: TITLE_LENGTH_RANGE
   end
 end

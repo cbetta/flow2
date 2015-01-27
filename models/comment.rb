@@ -1,10 +1,13 @@
-class Comment < Sequel::Model(DB[:comments])
+class Comment < Sequel::Model
+  include Concerns::Content
+  include Concerns::Validations
+
   CONTENT_LENGTH_RANGE = 5..8192
+  INLINE_MAX_LENGTH = 80
   ALLOWED_ELEMENTS = %w{a em strong b br li ul ol p code tt samp pre img}
 
   set_schema do
     primary_key :id
-
     String :content, text: true
     String :byline
     Time :created_at
@@ -22,57 +25,28 @@ class Comment < Sequel::Model(DB[:comments])
   many_to_one :user
   many_to_one :post
 
-  def after_initialize
-    self.created_at ||= Time.now
-    self.metadata ||= Sequel.hstore({})
-  end
-
-  def timestamp
-    self.created_at.to_i
-  end
-
-  def avatar_url
-    self.user && self.user.avatar
-  end
-
+  # Content to show 'inline' on the front page - keep it short and truncate where necessary
   def inline_content
-    length = 80
-    content = Sanitize.fragment(rendered_content)[0,length]
-    content += "..." if rendered_content.length > length
+    content = Sanitize.fragment(rendered_content)[0,INLINE_MAX_LENGTH]
+    content += "&hellip;" if rendered_content.length > INLINE_MAX_LENGTH
     content
   end
 
+  # The comment's content rendered from Markdown through to HTML and sanitized
   def rendered_content
     content = Kramdown::Document.new(self.content).to_html
     cleaned = Sanitize.fragment(content, elements: ALLOWED_ELEMENTS, attributes: { 'a' => %w{href title} })
 
-    if !self.user || !self.user.approved
-      doc = Nokogiri::HTML::fragment(cleaned)
-      doc.css('a').each { |link| link['rel'] = 'nofollow' }
-      cleaned = doc.to_html
-    end
+    # Change links to have rel='nofollow' (to help with spam) if it's from a non-approved user
+    cleaned = Sanitize.nofollow_links(cleaned) if !self.user || (!self.user.approved && !self.user.admin?)
 
-    return cleaned
-  end
-
-  def avatar?; avatar_url end
-
-  def time
-    Kronic.format(self.created_at)
-  end
-
-  def author
-    self.user ? self.user.display_name : self.byline ? self.byline : 'Anon'
+    cleaned
   end
 
   def validate
     super
 
-    if self.content && self.content.is_a?(String)
-      errors.add(:content, 'Your comment is too short') if self.content.length < CONTENT_LENGTH_RANGE.min
-      errors.add(:content, 'Your comment is too long') if self.content.length > CONTENT_LENGTH_RANGE.max
-    else
-      errors.add(:content, 'No comment body present')
-    end
+    presence_of :content
+    length_of :content, in: CONTENT_LENGTH_RANGE
   end
 end

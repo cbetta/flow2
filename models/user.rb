@@ -56,6 +56,12 @@ class User < Sequel::Model(DB[:users])
     end
   end
 
+  def social_link
+    unless self.username =~ /^__/
+      %{ <a href='https://#{AUTH_PROVIDER.downcase}.com/#{self.username}'><i class='fa fa-#{AUTH_PROVIDER.downcase}'></i></a>}
+    end
+  end
+
   # Is the user an admin?
   def admin?
     metadata['admin'] && metadata['admin'].to_s == 'true'

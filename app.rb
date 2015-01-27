@@ -18,8 +18,13 @@ end
 require_relative 'config/sequel'
 require_relative 'config/redis'
 require_relative 'config/aws'
+
 require_relative 'lib/mirror_image'
 require_relative 'lib/rate_limiter'
+require_relative 'lib/sanitize_ext'
+
+require_relative 'concerns/content'
+require_relative 'concerns/validations'
 
 require_relative 'models/user'
 require_relative 'models/post'

@@ -1,5 +1,5 @@
 workers Integer(ENV['WEB_CONCURRENCY'] || 2)
-threads Integer(ENV['MIN_THREADS'] || 6), Integer(ENV['MAX_THREADS'] || 12)
+threads Integer(ENV['MIN_THREADS'] || 4), Integer(ENV['MAX_THREADS'] || 6)
 
 rackup      DefaultRackup
 port        ENV['PORT']     || 5000

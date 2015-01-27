@@ -40,6 +40,8 @@ H3 { font-size: 1.3em; }
 
 A { color: $theme_color; }
 
+CITE { font-style: normal; }
+
 PRE CODE {
   padding: 1em 2em;
   display: block;
@@ -52,7 +54,7 @@ PRE CODE {
 
 .inner {
   max-width: $inner_width;
-  min-width: 20em;
+  min-width: 300px;
   margin: 18px auto;
   padding: 0 12px;
 }
@@ -157,7 +159,7 @@ ARTICLE.post {
     font-weight: $bold_weight;
     color: #c00;
     padding: 0px 7px 0px;
-    font-size: 1.3em;
+    font-size: 1.4em;
     line-height: 1.2em;
     margin-bottom: 4px;
     margin-left: -$post_padding;
@@ -192,7 +194,7 @@ ARTICLE.post {
 
   .metadata {
     color: #bbb;
-    font-size: 0.8em;
+    font-size: 0.9em;
     line-height: 1.5em;
     text-transform: uppercase;
     CITE {
@@ -457,6 +459,8 @@ H3.divider {
   text-align: right;
 }
 
+
+// For most mobile and small desktop screen scenarios
 @media screen and (max-width: 620px) {
   .menu .optional { display: none; }
 
@@ -484,3 +488,14 @@ H3.divider {
     }
   }
 }
+
+// For very small screens, sacrifices must be made
+@media screen and (max-width: 420px) {
+  HEADER.top { 
+    .avatar { display: none }
+    .menu A {
+      padding: 0px 10px;
+    }
+  }
+}
+
