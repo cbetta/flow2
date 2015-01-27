@@ -2,17 +2,17 @@ class Post < Ohm::Model
   include Ohm::DataTypes
   include Ohm::Callbacks
 
-  #attribute :uid
-  #index :uid
-#
-  #attribute :slug
-  #attribute :title
-  #attribute :content
-  #reference :user, :User
-  #collection :comments, :Comment
-  #attribute :byline
-  #attribute :created_at, Type::Time
-  #attribute :metadata, Type::Hash
+  attribute :uid
+  index :uid
+
+  attribute :slug
+  attribute :title
+  attribute :content
+  reference :user, :User
+  collection :comments, :Comment
+  attribute :byline
+  attribute :created_at, Type::Time
+  attribute :metadata, Type::Hash
 
   MIN_LENGTH = 10
   MAX_LENGTH = 10000
