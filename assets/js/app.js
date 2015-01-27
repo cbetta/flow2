@@ -1,3 +1,6 @@
+//= require jquery-2.1.3.min.js
+//= require sisyphus.min.js
+
 // Polling for new posts every 2 minutes should be more than enough
 // TODO: Not implemented yet
 var pollFrequency = 120;

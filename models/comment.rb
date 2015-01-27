@@ -20,11 +20,6 @@ class Comment < Sequel::Model(DB[:comments])
   many_to_one :user
   many_to_one :post
 
-  def self.find_where_editable_by(user, conditions)
-    obj = find(conditions)
-    return obj if obj.user == user || user.admin?
-  end  
-
   def after_initialize
     self.created_at ||= Time.now
     self.metadata ||= Sequel.hstore({})
