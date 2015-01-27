@@ -33,7 +33,7 @@ class User < Ohm::Model
   end
 
   def before_create
-    self.created_at = Time.now
+    self.created_at ||= Time.now
     self.metadata ||= {}
   end
 

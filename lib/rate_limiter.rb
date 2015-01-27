@@ -1,14 +1,19 @@
 module RateLimiter
-  REDIS = Ohm.redis
+  $redis ||= Ohm.redis
 
   def within_rate_limit(key = :default, requests: 3, within: 240)
     # Create a key that uses the client's IP
     rate_key = 'rate:' + key.to_s + ':' + (defined?(request) ? request.ip : 'localhost')
 
     # TODO: Be a bit more intelligent about expiry, as things stand, 'overage' resets the counter even if it shouldn't
-    req = REDIS.call("INCR", rate_key)
-    REDIS.call("EXPIRE", rate_key, within)
-
+    req = if $redis.class == Redic
+      $redis.call("INCR", rate_key)
+      $redis.call("EXPIRE", rate_key, within)
+    elsif $redis.class == Redis
+      $redis.incr(rate_key)
+      $redis.expire(rate_key, within)
+    end
+    
     req <= requests
   end
 
@@ -18,4 +23,6 @@ module RateLimiter
 
     halt 429 unless within_rate_limit(key, requests: requests, within: within)
   end
+
+  extend self
 end

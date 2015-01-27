@@ -13,7 +13,7 @@ class Comment < Ohm::Model
   MAX_LENGTH = 4096
 
   def before_create
-    self.created_at = Time.now
+    self.created_at ||= Time.now
     self.metadata ||= {}
   end
 
@@ -54,7 +54,6 @@ class Comment < Ohm::Model
   def author
     self.user ? self.user.username : self.byline ? self.byline : 'Anon'
   end
-
 
   def valid?
     if self.content

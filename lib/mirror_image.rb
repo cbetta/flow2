@@ -2,8 +2,6 @@ require 'fastimage'
 require 'open-uri'
 
 module MirrorImage
-  module_function
-
   def mirror_image_to_s3(url, name)
     return false unless type = FastImage.type(url)
 
@@ -13,4 +11,6 @@ module MirrorImage
   rescue
     false
   end
+
+  extend self
 end

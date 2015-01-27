@@ -32,12 +32,11 @@ module Flow
         i += 1
         puts i if i % 100 == 0
         u = User.new
-        u.username = row['login']
+        u.username = "__" + row['login']   # append double underscore so 'old' style users are still around, but not conflicting with new ones
         u.email = row['email']
         u.set_metadata url: row['url'], crypted_password: row['crypted_password'], salt: row['salt']
         u.set_metadata admin: true if row['admin'] == 1
         u.approved = row['approved_for_feed'] == 1
-        u.save
         u.created_at = row['created_at']
         u.save
         $users[row['id']] = u
@@ -63,7 +62,6 @@ module Flow
         end
 
         p.content = row['content']
-        p.save
         p.created_at = row['created_at']
         p.save
         $posts[row['id']] = p
@@ -87,7 +85,6 @@ module Flow
         end
 
         c.post = $posts[row['item_id']]
-        c.save
         c.created_at = row['created_at']
         c.save
       end

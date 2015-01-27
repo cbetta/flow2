@@ -29,12 +29,12 @@ AUTH_PROVIDER = ENV['AUTH_PROVIDER'] || "GitHub"
 POST_ELEMENTS = %w{a em strong b br li ul ol p code tt samp}
 COMMENT_ELEMENTS = POST_ELEMENTS + %w{img}
 ABOUT_PAGE_PRESENT = Post.find(uid: 'about').first
+POSTS_PER_PAGE = ENV['POSTS_PER_PAGE'] || 25
 
 use OmniAuth::Builder do
   provider :github, ENV['GITHUB_KEY'], ENV['GITHUB_SECRET'], scope: 'user:email' if AUTH_PROVIDER.downcase == 'github'
   provider :twitter, ENV['TWITTER_KEY'], ENV['TWITTER_SECRET'], scope: 'user:email' if AUTH_PROVIDER.downcase == 'twitter'
 end
-
 
 module Flow
   class App < Sinatra::Base
@@ -66,8 +66,6 @@ module Flow
         config.public_path = public_folder
         config.debug       = true if development?
       end
-
-      POSTS_PER_PAGE = ENV['POSTS_PER_PAGE'] || 25
     end
 
     helpers do
@@ -148,10 +146,10 @@ module Flow
       erb :post
     end
 
-    get '/logout' do
-      session[:logged_in] = false
-      redirect '/'
-    end
+
+
+
+    # --- POSTING AND COMMENTING URLS
 
     post '/post' do
       if logged_in?
@@ -220,60 +218,80 @@ module Flow
       end
     end
 
-    # OmniAuth callback
-    get '/auth/' + AUTH_PROVIDER.downcase + '/callback' do
-      r = request.env['omniauth.auth']
 
+    # --- AUTHENTICATION URLS
+
+    get '/logout' do
+      session[:logged_in] = false
+      redirect '/'
+    end
+
+    # OmniAuth callback used by external auth providers
+    get '/auth/' + AUTH_PROVIDER.downcase + '/callback' do
+      # Be sure we're receiving everything we want to receive
+      r = request.env['omniauth.auth']
       halt 401 unless r.is_a?(Hash)
 
       provider = r['provider']
       uid = r['uid']
-
       halt 401 unless provider && uid && r['info']
 
+      # Find if there's a user associated with the external ID being sent
       u = User.find(external_uid: uid).first
 
+      # If there is, we're logged in, hurrah.
       if u
         session[:logged_in] = u.id
       else
+        # Otherwise, create a user based on the information received
         begin
           u = User.new
           u.username = r['info']['nickname']
-          u.set_metadata email: r['info']['email']
-          u.set_metadata provider: provider
+          u.set_metadata email: r['info']['email'], provider: provider
           u.external_uid = uid
           u.external_token = r['credentials']['token']
           u.fullname = r['info']['name']
 
+          # Do they have an image/avatar at the auth provider? If so, mirror it.
           if r['info']['image']
             fn = u.username.to_s + uid.to_s
-            u.avatar_url = MirrorImage.mirror_image_to_s3(r['info']['image'], fn)
+            # Since it's not essential, we'll rescue this away if the upload fails
+            u.avatar_url = MirrorImage.mirror_image_to_s3(r['info']['image'], fn) rescue nil
           end
-          r['info']['nickname']
-          r['info']['nickname']
+
           u.save
           session[:logged_in] = u.id
         rescue
+          # If all else fails, I'm a Teapot.
+          # TODO: This may occur if the username is not unique, so deal with it better!
           halt 418
         end
       end
 
+      # We're logged in, we hope.
       flash[:notice] = "You are now logged in"
       flash[:oauth_successful] = true
 
-      redirect session[:return_to] || '/'
+      # Return to what the user was doing, if we know what that was, otherwise the root URL
+      redirect session[:return_to] || ENV['BASE_URL'] || '/'
     end
 
+    # External auth failed
     get '/auth/failure' do
-      erb "<h1>Authentication failed</h1><h3>message:<h3> <pre>#{params}</pre>"
+      # TODO: Show a nicer message than this
+      erb "<h1>Authentication failed</h1>"
     end
 
+    # The external auth provider isn't liking us
     get '/auth/:provider/deauthorized' do
+      # TODO: Show a nicer message than this
       erb "#{params[:provider]} has deauthorized this app."
     end
 
 
-    # For compatibility with old flow sites
+    # --- COMPATIBILITY URLS
+
+    # For compatibility with old flow sites for SEO/usability purposes
     get '/items/:id' do
       redirect %{/p/#{params[:id]}}
     end

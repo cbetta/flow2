@@ -12,13 +12,18 @@ module S3
       CLIENT.buckets.create(ENV['AWS_BUCKET'])
     end
 
-    BUCKET = begin
-      CLIENT.buckets[ENV['AWS_BUCKET']].acl
-      puts "#{ENV['AWS_BUCKET']} bucket successfully accessed"
+    BUCKET = if ENV['AWS_BUCKET_CHECK']
+      puts "#{ENV['AWS_BUCKET']} bucket attached"
       CLIENT.buckets[ENV['AWS_BUCKET']]
-    rescue
-      puts "ERROR - #{ENV['AWS_BUCKET']} bucket could not be accessed"
-      nil
+    else
+      begin
+        CLIENT.buckets[ENV['AWS_BUCKET']].acl
+        puts "#{ENV['AWS_BUCKET']} bucket successfully accessed"
+        CLIENT.buckets[ENV['AWS_BUCKET']]
+      rescue
+        puts "ERROR - #{ENV['AWS_BUCKET']} bucket could not be accessed"
+        nil
+      end
     end
   end
 
