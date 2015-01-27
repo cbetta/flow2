@@ -139,6 +139,7 @@ module Flow
       id = params[:id].split('-').first
       @body_classes << 'post'
       @post = Post.find(uid: id)
+      @editing = params[:edit] && params[:edit] == 'true'
 
       if @post
         @page_title = @post.title
@@ -166,8 +167,10 @@ module Flow
       if logged_in?
         post ||= Post.new
         post.title = params[:title]
-        post.user = current_user
+        post.user ||= current_user
         post.content = params[:content]
+
+        p post
 
         unless post.valid?
           content_type :json

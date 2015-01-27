@@ -55,8 +55,8 @@ $(document).ready(function() {
     var that = $(this);
     $.ajax({
              type: "POST",
-             url: $('DIV.postbox FORM').attr('action'),
-             data: $('DIV.postbox FORM').serialize(),
+             url: that.closest('FORM').attr('action'),
+             data: that.closest('FORM').serialize(),
              success: function(res) {
                // Remove any errors showing on the form
                that.closest('FORM').find('.error').remove();

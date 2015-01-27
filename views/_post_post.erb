@@ -1,12 +1,13 @@
-<div id="postcomment" class="postbox <%= 'noavatar' if !with_avatar %>">
+<div id="postpost" class="postbox <%= 'noavatar' if !with_avatar %>">
 	<div class="avatar" <% if with_avatar %>style="background-image: url(<%= current_user.avatar_url %>)"<% end %>></div>
 
 	<form method="post" id="post_post" name="post_post" action="/post">
-		<input type="text" placeholder="Title" name="title" class="title" size="50" maxlength="85" required />
-		<textarea name="content" rows="4" cols="90" class="content" placeholder="Type your main post content here, including links."></textarea>
+		<% if @post %><input type="hidden" name="post_uid" value="<%= @post.uid %>" /><% end %>
+		<input type="text" placeholder="Title" name="title" class="title" size="50" maxlength="85" value="<%= @post && @post.title %>" required />
+		<textarea name="content" rows="4" cols="90" class="content" placeholder="Type your main post content here, including links."><%= @post && @post.content %></textarea>
 		<div class="help">You can use basic HTML markup (e.g. &lt;a&gt;) or Markdown.</div>
 		<div class="right">
-			<button type="submit" class="submit post"><%= logged_in? ? "Submit your post" : "Authenticate with " + AUTH_PROVIDER %></button>
+			<button type="submit" class="submit post"><%= logged_in? ? @editing ? "Save" : "Submit your post" : "Authenticate with " + AUTH_PROVIDER %></button>
 			<% unless logged_in? %><br>As you are not logged in, you will be<br>directed via <%= AUTH_PROVIDER %> to signup or sign in<% end %>
 		</div>
 	</form>
