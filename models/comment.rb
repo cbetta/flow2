@@ -62,7 +62,7 @@ class Comment < Sequel::Model(DB[:comments])
   end
 
   def author
-    self.user ? self.user.username : self.byline ? self.byline : 'Anon'
+    self.user ? self.user.display_name : self.byline ? self.byline : 'Anon'
   end
 
   def validate
