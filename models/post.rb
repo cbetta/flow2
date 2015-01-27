@@ -151,6 +151,6 @@ class Post < Sequel::Model(DB[:posts])
   end
 
   def self.is_there_a_page?(page)
-    Post.count > (page - 1) * POST_PER_PAGE
+    Post.count > (page - 1) * POSTS_PER_PAGE
   end
 end
