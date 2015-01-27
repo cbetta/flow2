@@ -158,11 +158,10 @@ ARTICLE.post {
     font-family: $fonts_headers;
     font-weight: $bold_weight;
     color: #c00;
-    padding: 0px 7px 0px;
+    padding-right: 7px;
     font-size: 1.4em;
     line-height: 1.2em;
     margin-bottom: 4px;
-    margin-left: -$post_padding;
     color: $text_color;
     margin-right: 4px;
     orphans: 3;
@@ -173,7 +172,6 @@ ARTICLE.post {
         color: #999;
       }
       &:hover {
-        //background-color: #fcc;
         color: #c00 !important;
         text-decoration: underline;
       }
@@ -184,13 +182,13 @@ ARTICLE.post {
   P { margin: 0 }
 
   .body, .comments { margin-left: $avatar_size + 16px; }
-  H1 { margin-left: 0; padding: 0; }
 
-  &.withavatar {
-    //padding-left: 0;
+  .body { 
+    A:visited {
+        color: #999;
+        font-weight: 300;
+    }
   }
-
-
 
   .metadata {
     color: #bbb;
