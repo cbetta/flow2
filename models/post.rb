@@ -1,6 +1,7 @@
 class Post < Sequel::Model(DB[:posts])
   CONTENT_LENGTH_RANGE = 10..10000
   TITLE_LENGTH_RANGE = 6..100
+  POSTS_PER_PAGE = ENV['POSTS_PER_PAGE'] || 25
 
   set_schema do
     primary_key :id
@@ -147,5 +148,9 @@ class Post < Sequel::Model(DB[:posts])
     else
       errors.add(:title, 'Title is not present')
     end
+  end
+
+  def self.is_there_a_page?(page)
+    Post.count > (page - 1) * POST_PER_PAGE
   end
 end

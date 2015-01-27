@@ -2,6 +2,8 @@
 <%= erb :_post, locals: { post: post } %>
 <% end %>
 
+<% if Post.is_there_a_page?(@page.to_i + 1) %>
 <div class="nextpage">
 	<a href="?page=<%= @page.to_i + 1 %>">Next page &raquo;</a>
 </div>
+<% end %>

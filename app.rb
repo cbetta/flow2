@@ -29,7 +29,6 @@ AUTH_PROVIDER = ENV['AUTH_PROVIDER'] || "GitHub"
 POST_ELEMENTS = %w{a em strong b br li ul ol p code tt samp}
 COMMENT_ELEMENTS = POST_ELEMENTS + %w{img}
 ABOUT_PAGE_PRESENT = Post[uid: 'about']
-POSTS_PER_PAGE = ENV['POSTS_PER_PAGE'] || 25
 
 use OmniAuth::Builder do
   provider :github, ENV['GITHUB_KEY'], ENV['GITHUB_SECRET'], scope: 'user:email' if AUTH_PROVIDER.downcase == 'github'
@@ -88,7 +87,7 @@ module Flow
 
         if params[:page].to_i > 0
           @page = params[:page].to_i
-          @offset = (@page - 1) * POSTS_PER_PAGE
+          @offset = (@page - 1) * Post::POSTS_PER_PAGE
         end
       end
 
@@ -114,7 +113,7 @@ module Flow
 
       @body_classes << 'index'
       determine_page
-      @posts = Post.reverse_order(:id).limit(POSTS_PER_PAGE).offset(@offset).all
+      @posts = Post.reverse_order(:id).limit(Post::POSTS_PER_PAGE).offset(@offset).all
 
       if request.xhr?
         erb :posts, layout: false
@@ -124,7 +123,7 @@ module Flow
     end
 
     get '/rss' do
-      @posts = Post.reverse_order(:id).limit(POSTS_PER_PAGE).offset(@offset).all
+      @posts = Post.reverse_order(:id).limit(Post::POSTS_PER_PAGE).offset(@offset).all
       content_type :rss
       builder :posts
     end
