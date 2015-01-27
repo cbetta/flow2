@@ -1,1 +1,10 @@
-<div id="sitedescription" style="display: none"><div class="inner"><h2><%= ENV['SITE_DESCRIPTION'] %></h2></div></div>
+<div id="sitedescription" style="display: none">
+  <div class="inner">
+    <% if DESCRIPTION_PAGE %>
+      <h2><%= DESCRIPTION_PAGE.title %></h2>
+      <div class="description"><%= DESCRIPTION_PAGE.rendered_content %></div>
+    <% else %>
+      <h2><%= ENV['SITE_DESCRIPTION'] %></h2>
+    <% end %>
+  </div>
+</div>

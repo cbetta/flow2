@@ -10,6 +10,7 @@ class Post < Sequel::Model(DB[:posts])
     String :title
     String :content, text: true
     String :byline
+    TrueClass :visible, default: true
     Time :created_at
     HStore :metadata
 
@@ -19,7 +20,9 @@ class Post < Sequel::Model(DB[:posts])
     constraint(:content_length_range, Sequel.function(:char_length, :content) => CONTENT_LENGTH_RANGE)
   end
 
-  create_table unless table_exists?
+  unless table_exists?
+    create_table
+  end
 
   many_to_one :user
   one_to_many :comments
@@ -30,6 +33,9 @@ class Post < Sequel::Model(DB[:posts])
     self.uid ||= self.class.generate_unique_id
   end
 
+  def self.recent_from_offset(offset = 0)
+    where(visible: true).reverse_order(:id).limit(Post::POSTS_PER_PAGE).offset(offset).all
+  end
 
   def self.generate_unique_id(length = 6)
     max = 36 ** length - 1        # e.g. "zzzzzz" in base 36
@@ -131,13 +137,19 @@ class Post < Sequel::Model(DB[:posts])
     ''
   end
 
+  def day_of_year
+    self.created_at.strftime("%j")
+  end
+
   def validate
     super
 
     if self.content && self.content.is_a?(String)
       errors.add(:content, 'Post is too short') if self.content.length < CONTENT_LENGTH_RANGE.min
       errors.add(:content, 'Post is too long') if self.content.length > CONTENT_LENGTH_RANGE.max
-      errors.add(:content, 'Your post contains no links') if !self.user.admin? && self.content !~ /\<a /i
+      if self.user && !self.user.admin? && self.rendered_content !~ /\<a /i
+        errors.add(:content, 'Your post contains no links')
+      end
     else
       errors.add(:content, 'No post body present')
     end

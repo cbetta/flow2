@@ -28,7 +28,8 @@ require_relative 'models/comment'
 AUTH_PROVIDER = ENV['AUTH_PROVIDER'] || "GitHub"
 POST_ELEMENTS = %w{a em strong b br li ul ol p code tt samp}
 COMMENT_ELEMENTS = POST_ELEMENTS + %w{img}
-ABOUT_PAGE_PRESENT = Post[uid: 'about']
+ABOUT_PAGE = Post[uid: 'about']
+DESCRIPTION_PAGE = Post[uid: 'description']
 
 use OmniAuth::Builder do
   provider :github, ENV['GITHUB_KEY'], ENV['GITHUB_SECRET'], scope: 'user:email' if AUTH_PROVIDER.downcase == 'github'
@@ -117,7 +118,7 @@ module Flow
 
       @body_classes << 'index'
       determine_page
-      @posts = Post.reverse_order(:id).limit(Post::POSTS_PER_PAGE).offset(@offset).all
+      @posts = Post.recent_from_offset(@offset)
 
       if request.xhr?
         erb :posts, layout: false
@@ -127,7 +128,7 @@ module Flow
     end
 
     get '/rss' do
-      @posts = Post.reverse_order(:id).limit(Post::POSTS_PER_PAGE).offset(@offset).all
+      @posts = Post.recent_from_offset(@offset)
       content_type :rss
       builder :posts
     end
@@ -139,7 +140,10 @@ module Flow
       id = params[:id].split('-').first
       @body_classes << 'post'
       @post = Post.find(uid: id)
+
       @editing = params[:edit] && params[:edit] == 'true'
+
+      halt 403 if @editing && !@post.can_be_edited_by?(current_user)
 
       if @post
         @page_title = @post.title
@@ -152,11 +156,21 @@ module Flow
 
 
     # --- POSTING AND COMMENTING URLS
+    # You can tell I really don't give a care about REST on this project so far ;-)
+    # And I really don't.
 
     delete '/post/:uid' do
       post = Post.find_where_editable_by(current_user, uid: params[:uid])
       halt 404 unless post
       post.delete
+      content_type :json
+      erb({ success: true }.to_json, layout: false)
+    end
+
+    delete '/comment/:id' do
+      comment = Comment.find_where_editable_by(current_user, id: params[:id])
+      halt 404 unless comment
+      comment.delete
       content_type :json
       erb({ success: true }.to_json, layout: false)
     end
@@ -169,12 +183,16 @@ module Flow
         post.title = params[:title]
         post.user ||= current_user
         post.content = params[:content]
-
-        p post
+        post.visible = false if current_user.metadata['shadowbanned']
 
         unless post.valid?
           content_type :json
           halt erb({ errors: post.errors_list }.to_json, layout: false)
+        end
+
+        if params[:preview]
+          content_type :json
+          halt erb({ preview: { title: post.title, content: post.rendered_content } }.to_json, layout: false)
         end
 
         unless within_rate_limit(:posting, requests: 1, within: 10)
@@ -183,6 +201,8 @@ module Flow
         end
 
         post.save
+
+        flash[:notice] = "Your post has been saved - thanks!"
 
         if request.xhr?
           content_type :json
@@ -201,7 +221,7 @@ module Flow
       post = Post.find(uid: params[:post_id])
 
       comment = Comment.find_where_editable_by(current_user, id: params[:comment_id]) if params[:comment_id]
-        
+
       halt 400 unless post
 
       if logged_in?
@@ -215,12 +235,14 @@ module Flow
           halt erb({ errors: comment.errors_list }.to_json, layout: false)
         end
 
-        comment.save
-
         unless within_rate_limit(:commenting, requests: 4, within: 120)
           content_type :json
           halt erb({ errors: [['content', 'Slow down the commenting a little']] }.to_json, layout: false)
         end
+
+        comment.save
+
+        flash[:notice] = "Your comment has been posted - thanks!"
 
         if request.xhr?
           content_type :json
@@ -240,6 +262,7 @@ module Flow
 
     get '/logout' do
       session[:logged_in] = false
+      flash[:notice] = "You have logged out"
       redirect '/'
     end
 
@@ -287,7 +310,12 @@ module Flow
       end
 
       # We're logged in, we hope.
-      flash[:notice] = "You are now logged in"
+      flash[:notice] = "You are now logged in."
+
+      if session[:return_to].to_s =~ /submitform/
+        flash[:notice] = "You are now logged in and can submit your post to the site"
+      end
+
       flash[:oauth_successful] = true
 
       # Return to what the user was doing, if we know what that was, otherwise the root URL

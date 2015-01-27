@@ -7,6 +7,7 @@ class Comment < Sequel::Model(DB[:comments])
     String :content, text: true
     String :byline
     Time :created_at
+    TrueClass :visible, default: true
     HStore :metadata
 
     foreign_key :user_id, :users, on_delete: :set_null, on_update: :cascade

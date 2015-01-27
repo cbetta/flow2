@@ -1,5 +1,9 @@
+<% if @page == 1 || params[:page].to_i == @page %>
+  <h3 class='divider'><i class='fa fa-calendar-o'></i>&nbsp;&nbsp;<%= @posts.first.time %></h3>
+<% end %>
+
 <% @posts.each do |post| %>
-<%= erb :_post, locals: { post: post } %>
+  <%= erb :_post, locals: { post: post } %>
 <% end %>
 
 <% if Post.is_there_a_page?(@page.to_i + 1) %>

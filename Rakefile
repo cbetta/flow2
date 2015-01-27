@@ -14,7 +14,7 @@ end
 desc "Import posts from a RubyFlow v1 file"
 task :import do
   require_relative 'lib/import'
-  Flow::Import.import(ENV['database'])
+  Flow::Import.import(ENV['database'], ENV['database_url'])
 end
 
 desc "Delete all data in Redis"

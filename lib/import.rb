@@ -6,7 +6,7 @@ module Flow
   module Import
     module_function
 
-    def import(file)
+    def import(file, database_url = nil)
       # Import from the Web
       t = nil
       if file.start_with?('http')
@@ -83,11 +83,11 @@ module Flow
         p.content = row['content']
         p.created_at = row['created_at']
         begin
-          p.save
+          p.save validate: false
         rescue => e
           puts "Skipping post #{p.uid} due to errors"
-          #p p.errors
-          #p e
+          p p.errors
+          p e
         end
         $posts[row['id']] = p
       end
@@ -95,7 +95,7 @@ module Flow
 
     def import_comments
       puts "Importing comments"
-      DB.run("TRUNCATE comments CASCADE")      
+      DB.run("TRUNCATE comments CASCADE")
       i = 0
       $db.execute("SELECT * FROM comments ORDER BY id ASC") do |row|
         i += 1

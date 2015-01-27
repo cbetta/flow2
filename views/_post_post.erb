@@ -1,14 +1,27 @@
 <div id="postpost" class="postbox <%= 'noavatar' if !with_avatar %>">
-	<div class="avatar" <% if with_avatar %>style="background-image: url(<%= current_user.avatar_url %>)"<% end %>></div>
+	<div class="avatar" <% if with_avatar %>style="background-image: url(<%= @post && @post.user ? @post.user.avatar_url : current_user.avatar_url %>)"<% end %>></div>
 
 	<form method="post" id="post_post" name="post_post" action="/post">
 		<% if @post %><input type="hidden" name="post_uid" value="<%= @post.uid %>" /><% end %>
 		<input type="text" placeholder="Title" name="title" class="title" size="50" maxlength="85" value="<%= @post && @post.title %>" required />
 		<textarea name="content" rows="4" cols="90" class="content" placeholder="Type your main post content here, including links."><%= @post && @post.content %></textarea>
-		<div class="help">You can use basic HTML markup (e.g. &lt;a&gt;) or Markdown.</div>
+		<div class="help">You can use basic HTML markup (e.g. &lt;a&gt;) or Markdown.<br>Note that your post may be edited to suit the format of the site.</div>
 		<div class="right">
+			<% if logged_in? %><button class="preview post">Preview</button><% end %>
 			<button type="submit" class="submit post"><%= logged_in? ? @editing ? "Save" : "Submit your post" : "Authenticate with " + AUTH_PROVIDER %></button>
 			<% unless logged_in? %><br>As you are not logged in, you will be<br>directed via <%= AUTH_PROVIDER %> to signup or sign in<% end %>
 		</div>
 	</form>
+
+	<div id="preview">
+		<h2>Post Preview</h2>
+		<article class="post">
+		<div class="body">
+    <h1><a href="#"><span class="title"></span></a></h1>
+    <p><span class="content"></span></p>
+    </div>
+    </article>
+
+    <p>Note: Only the first pargraph is shown on the front page and overly long paragraphs may be broken up.</p>
+	</div>
 </div>

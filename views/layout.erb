@@ -22,7 +22,7 @@
           <% end %>
           <li><a href="/rss" title="RSS feed"><i class="fa fa-rss"></i><span class="optional">RSS</span></a></li>
           <% if ENV['TWITTER_USERNAME'] %><li><a href="https://twitter.com/<%= ENV['TWITTER_USERNAME'] %>" title="Twitter"><i class="fa fa-twitter"></i><span class="optional">Twitter</span></a></li><% end %>
-          <% if ABOUT_PAGE_PRESENT %><li><a href="/p/about" title="About"><i class="fa fa-question"></i><span class="optional">About</span></a></li><% end %>
+          <% if ABOUT_PAGE %><li><a href="<%= ABOUT_PAGE.url %>" title="About"><i class="fa fa-question"></i><span class="optional"><%= ABOUT_PAGE.title %></span></a></li><% end %>
           <li><a href="#" class="submit" title="Submit a post"><i class="fa fa-plus"></i><span class="optional">Submit</span></a></li>
         </ul>
       </div>
@@ -47,5 +47,10 @@
     var base_url = "<%= ENV['BASE_URL'] %>";
   </script>
   <%= javascript_tag 'app' %>
+  <script>
+    <% if flash[:notice] %>$.growl.notice({ message: "<%= flash[:notice] %>" });<% end %>
+    <% if flash[:error] %>$.growl.error({ message: "<%= flash[:error] %>" });<% end %>
+    <% if flash[:warning] %>$.growl.warning({ message: "<%= flash[:warning] %>" });<% end %>
+  </script>
 </body>
 </html>

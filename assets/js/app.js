@@ -1,5 +1,6 @@
 //= require jquery-2.1.3.min.js
 //= require sisyphus.min.js
+//= require jquery.growl.js
 
 // Polling for new posts every 2 minutes should be more than enough
 // TODO: Not implemented yet
@@ -35,7 +36,8 @@ $(document).ready(function() {
   // Make sure all forms save their contents
   $('.postbox FORM').sisyphus({ autoRelease: false });
 
-  $('section.posts').on('click', '.tools.post A.delete', function(e) {
+  // Deleting posts
+  $('section.posts').on('click', '.tools A.delete', function(e) {
     var el = $(this).closest('article.post');
     var uid = el.data('uid');
     if (confirm('Delete this post?')) {
@@ -50,17 +52,53 @@ $(document).ready(function() {
     e.preventDefault();
   });
 
+  // Deleting comments
+  $('section.comments').on('click', '.tools A.delete', function(e) {
+    var el = $(this).closest('div.comment');
+    var id = el.data('id');
+
+    if (confirm('Delete this comment?')) {
+      $.ajax({
+        type: "DELETE",
+        url: base_url + "/comment/" + id,
+        success: function(res) {
+          el.hide();
+        }
+      });
+    }
+    e.preventDefault();
+    return false;
+  });
+
+
+
   // When submitting a form, do lots of stuff..
-  $('BUTTON.submit.comment, BUTTON.submit.post').click(function() {
+  $('BUTTON.submit.comment, BUTTON.submit.post, BUTTON.preview.post').click(function(e) {
     var that = $(this);
+    var data = that.closest('FORM').serialize();
+
+    if ($(this).hasClass('preview')) {
+      data += '&preview=true';
+    }
+
     $.ajax({
              type: "POST",
              url: that.closest('FORM').attr('action'),
-             data: that.closest('FORM').serialize(),
+             data: data,
              success: function(res) {
                // Remove any errors showing on the form
                that.closest('FORM').find('.error').remove();
                that.closest('FORM').find('INPUT, TEXTAREA').removeClass('errored');
+
+               // If there was a preview, show it
+               if (res['preview']) {
+                console.log('preview');
+                 $('#preview').show();
+                 $('#preview .title').html(res['preview']['title']);
+                 $('#preview .content').html(res['preview']['content']);
+                 return;
+               }
+               console.log('x');
 
                // If there were errors, show them
                if (res['errors']) {
@@ -87,6 +125,7 @@ $(document).ready(function() {
                }
              }
            });
+    e.preventDefault();
     return false;
   });
 
@@ -95,6 +134,8 @@ $(document).ready(function() {
     localStorage['seenDescription'] = true;
     $('#sitedescription').show();
   }
+
+  $('#sitedescription').show();
 
   function showSubmitForm() {
     $('#sitedescription').hide();

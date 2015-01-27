@@ -1,3 +1,5 @@
+//= require jquery.growl.css
+
 $theme_color: #c00;
 $text_color: #424242;
 $background_color: #f5f6f6;
@@ -25,7 +27,7 @@ BODY {
 }
 
 BODY.admin .admin {
-  display: inherit;
+  display: inline;
 }
 
 H1, H2, H3 {
@@ -294,6 +296,13 @@ BODY.post ARTICLE.post {
   text-align: center;
 }
 
+#preview {
+  display: none;
+  ARTICLE.post {
+    background: white; padding: 1em 0; margin: 0;
+  }
+}
+
 H3.divider {
   color: #999;
   font-size: 1.0em;
@@ -310,6 +319,11 @@ H3.divider {
   margin-right: -12px;
   margin-bottom: -18px;
   font-weight: bold;
+
+  // Never have back to back date dividers
+  + H3.divider {
+    display: none;
+  }
 }
 
 @-moz-keyframes pulsing {
@@ -381,10 +395,10 @@ H3.divider {
       font-size: 1.2em;
     }
 
-    BUTTON[type='submit'] {
+    BUTTON {
       cursor: pointer;
       padding: 2px 24px;
-      font-size: 1.4em;
+      font-size: 1.3em;
       font-family: $fonts;
       line-height: $line_height;
       font-weight: normal;
@@ -393,6 +407,9 @@ H3.divider {
       border: 0;
       border-radius: 12px;
       margin-bottom: 8px;
+      &.preview {
+        background-color: #aaa;
+      }
       BODY.oauth-successful & {
         -moz-animation-name: pulsing;
         -moz-animation-duration: 1s;
