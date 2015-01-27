@@ -29,11 +29,6 @@ AUTH_PROVIDER = ENV['AUTH_PROVIDER'] || "GitHub"
 ABOUT_PAGE = Post[uid: 'about']
 DESCRIPTION_PAGE = Post[uid: 'description']
 
-use OmniAuth::Builder do
-  provider(:github, ENV['GITHUB_KEY'], ENV['GITHUB_SECRET'], 'scope' => 'user:email') if AUTH_PROVIDER.downcase == 'github'
-  provider(:twitter, ENV['TWITTER_KEY'], ENV['TWITTER_SECRET'], 'scope' => 'user:email') if AUTH_PROVIDER.downcase == 'twitter'
-end
-
 module Flow
   class App < Sinatra::Base
     configure do
@@ -51,7 +46,8 @@ module Flow
       use Rack::Flash
 
       use OmniAuth::Builder do
-        provider :github, ENV["GITHUB_KEY"], ENV["GITHUB_SECRET"]
+        provider(:github, ENV['GITHUB_KEY'], ENV['GITHUB_SECRET'], scope: 'user:email') if AUTH_PROVIDER.downcase == 'github'
+        provider(:twitter, ENV['TWITTER_KEY'], ENV['TWITTER_SECRET'], scope: 'user:email') if AUTH_PROVIDER.downcase == 'twitter'
       end
 
       sprockets.append_path File.join(root, 'assets', 'css')
