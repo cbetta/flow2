@@ -21,6 +21,10 @@ class Sequel::Model
 
   def self.find_where_editable_by(user, conditions)
     obj = find(conditions)
-    return obj if obj.user == user || user.admin?
-  end  
+    obj && obj.can_be_edited_by?(user) ? obj : false
+  end
+
+  def can_be_edited_by?(the_user)
+  	the_user && (self.user == the_user || the_user.admin?)
+  end
 end

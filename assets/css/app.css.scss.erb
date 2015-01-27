@@ -21,6 +21,11 @@ BODY {
   color: $text_color;
   background-color: $background_color;
   margin: $top_padding 0;
+  .admin { display: none }
+}
+
+BODY.admin .admin {
+  display: inherit;
 }
 
 H1, H2, H3 {

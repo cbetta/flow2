@@ -18,41 +18,39 @@ function doDateBreakLines() {
   var lastdoy = 0;
   $('section.posts article.post').each(function(i) {
     var thisdoy = $(this).data('doy');
-    /* if (i == 0) {
+    if (thisdoy != lastdoy) {
       lastdoy = thisdoy;
-
-    } else { */
-      if (thisdoy != lastdoy) {
-        lastdoy = thisdoy;
-        if (!$(this).data('dateline')) {
-          $(this).data('dateline', true);
-          var timeEl = $(this).find('time').first();
-          $(this).before("<h3 class='divider'><i class='fa fa-calendar-o'></i>&nbsp;&nbsp;" + timeEl.text() + "</h3>");
-        }
-        $('article.post time').hide();
+      if (!$(this).data('dateline')) {
+        $(this).data('dateline', true);
+        var timeEl = $(this).find('time').first();
+        $(this).before("<h3 class='divider'><i class='fa fa-calendar-o'></i>&nbsp;&nbsp;" + timeEl.text() + "</h3>");
       }
-    /*} */
+      $('article.post time').hide();
+    }
   });
 }
 
 // When the document is loaded and good to go, do a lotta stuff!
 $(document).ready(function() {
-
-  //// if we're going thin from the start, make the sticky header permanent
-  //if (window.matchMedia("(max-width: 620px)").matches) {
-  //  $("body").addClass("fix-header permanent");
-  //}
-
-  //// sticky header
-  //$(window).scroll(function() {
-  //  if ($(window).scrollTop() > 74) {
-  //    $("body").addClass("fix-header");
-  //  } else if (!$("body").is('.fix-header.permanent')) {
-  //    $("body").removeClass("fix-header");
-  //  }
-  //});
+  // Make sure all forms save their contents
   $('.postbox FORM').sisyphus({ autoRelease: false });
 
+  $('section.posts').on('click', '.tools.post A.delete', function(e) {
+    var el = $(this).closest('article.post');
+    var uid = el.data('uid');
+    if (confirm('Delete this post?')) {
+      $.ajax({
+        type: "DELETE",
+        url: base_url + "/post/" + uid,
+        success: function(res) {
+          el.hide();
+        }
+      });
+    }
+    e.preventDefault();
+  });
+
+  // When submitting a form, do lots of stuff..
   $('BUTTON.submit.comment, BUTTON.submit.post').click(function() {
     var that = $(this);
     $.ajax({
@@ -60,17 +58,20 @@ $(document).ready(function() {
              url: $('DIV.postbox FORM').attr('action'),
              data: $('DIV.postbox FORM').serialize(),
              success: function(res) {
-               console.log(res);
+               // Remove any errors showing on the form
                that.closest('FORM').find('.error').remove();
                that.closest('FORM').find('INPUT, TEXTAREA').removeClass('errored');
+
+               // If there were errors, show them
                if (res['errors']) {
                  res['errors'].forEach(function(err) {
                    var el = that.closest('FORM').find('[name=' + err[0] + ']');
                    el.addClass('errored');
                    el.after("<div class='error'>" + err[1] + "</div>");
                  });
-                 //that.closest('FORM').find('.')
                }
+
+               // Redirect to a post that's just been created or edited
                if (res['redirect_to_post']) {
                  that.closest('FORM').sisyphus().manuallyReleaseData();
                  if (res['comment_id']) {
@@ -79,6 +80,8 @@ $(document).ready(function() {
                    window.location.href = res['redirect_to_post']
                  }
                }
+
+               // Redirect into the OAuth external authentication process
                if (res['redirect_to_oauth']) {
                  window.location = '/auth/' + res['redirect_to_oauth'];
                }
@@ -86,15 +89,6 @@ $(document).ready(function() {
            });
     return false;
   });
-
-  // If there's a form in local storage, it was probably unsubmitted, so repopulate the form, if any
-  //if (localStorage['formData']) {
-  //  // credit to http://stackoverflow.com/questions/9035825/read-from-serialize-to-populate-form for this
-  //  $.each(localStorage['formData'].split('&'), function (i, el) {
-  //    var vals = el.split('=');
-  //    $("FORM [name='" + vals[0] + "']").val(decodeURIComponent(vals[1]).replace(/\+/g, ' '));
-  //  });
-  //}
 
   // If the user hasn't seen the site's description bar before, show it
   if(!localStorage['seenDescription']) {
@@ -107,9 +101,10 @@ $(document).ready(function() {
     $('#submitform').show();
     window.scrollTo(0, 0);
     // TODO: Fixes an issue where scroll happens before box is drawn. Probably need to find a more elegant way to do this
-    setTimeout("window.scrollTo(0, 0);", 50);
+    setTimeout("window.scrollTo(0, 0);", 70);
   }
 
+  // If the user wants to write a post, show the form or head to the index page to show it there
   $('a.submit').click(function() {
     if ($('#submitform').length) {
       showSubmitForm();
@@ -118,10 +113,12 @@ $(document).ready(function() {
     }
   });
 
+  // Is the user trying to see the submission form? Show it
   if (window.location.hash && window.location.hash.substring(1) === 'submitform') {
     showSubmitForm();
   }
 
+  // If specifically directed to a certain comment, make it flash a bit
   if (window.location.hash && window.location.hash.match(/comment/)) {
     $(window.location.hash + ' .content').addClass('flashing');
   }
@@ -187,7 +184,6 @@ $(document).ready(function() {
 
   // TODO: Add polling for new posts
   //       Once new posts are found, either notify the user or just add them on to the page
-  //
 
   // If the tab is hidden (this is the Page Visibility API at work) we don't need to poll so much
   document.addEventListener("visibilitychange", function() {

@@ -9,8 +9,8 @@ class Comment < Sequel::Model(DB[:comments])
     Time :created_at
     HStore :metadata
 
-    foreign_key :user_id, :users
-    foreign_key :post_id, :posts
+    foreign_key :user_id, :users, on_delete: :set_null, on_update: :cascade
+    foreign_key :post_id, :posts, on_delete: :set_null, on_update: :cascade
 
     constraint(:content_length_range, Sequel.function(:char_length, :content) => CONTENT_LENGTH_RANGE)
   end

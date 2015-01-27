@@ -47,10 +47,17 @@ class User < Sequel::Model(DB[:users])
   def avatar?; avatar end
 
   def display_name
-    self.fullname || self.username
+    self.fullname || (self.username && self.username.sub(/^__/, '')) || "Unknown"
   end
 
+  # Is the user an admin?
   def admin?
-    metadata['admin']
+    metadata['admin'] && metadata['admin'].to_s == 'true'
+  end
+
+  # Make the user an admin - to be used from the console for now
+  def admin!
+    metadata['admin'] = true
+    save
   end
 end

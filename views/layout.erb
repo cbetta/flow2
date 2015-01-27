@@ -11,7 +11,7 @@
   <link rel="alternate" type="application/rss+xml" title="Feed" href="<%= ENV['BASE_URL'] %>/rss">
   <script src="//use.typekit.net/cap5cqx.js"></script><script>try{Typekit.load();}catch(e){}</script>
 </head>
-<body class="<%= @body_classes.join(' ') %> <%= 'oauth-successful' if flash[:oauth_successful] %>">
+<body class="<%= @body_classes.join(' ') %> <%= 'oauth-successful' if flash[:oauth_successful] %> <%= 'admin' if admin? %>">
   <header class="top">
     <div class="inner">
       <div class="menu">
@@ -43,6 +43,9 @@
   </script>
   <% end %>
 
+  <script>
+    var base_url = "<%= ENV['BASE_URL'] %>";
+  </script>
   <%= javascript_tag 'app' %>
 </body>
 </html>

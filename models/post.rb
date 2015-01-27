@@ -13,7 +13,7 @@ class Post < Sequel::Model(DB[:posts])
     Time :created_at
     HStore :metadata
 
-    foreign_key :user_id, :users
+    foreign_key :user_id, :users, on_delete: :set_null, on_update: :cascade
 
     constraint(:title_length_range, Sequel.function(:char_length, :title) => TITLE_LENGTH_RANGE)
     constraint(:content_length_range, Sequel.function(:char_length, :content) => CONTENT_LENGTH_RANGE)
@@ -50,7 +50,7 @@ class Post < Sequel::Model(DB[:posts])
   end
 
   def author
-    self.user ? self.user.username.sub(/^__/, '') : self.byline ? self.byline : 'Anon'
+    self.user ? self.user.display_name : self.byline ? self.byline : 'Anon'
   end
 
   def avatar_url

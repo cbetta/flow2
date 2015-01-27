@@ -1,11 +1,11 @@
-<article class="post <%= "withavatar" if post.avatar? %>" data-id="<%= post.id %>" data-timestamp="<%= post.timestamp %>" data-page="<%= @page %>" data-doy="<%= post.created_at.strftime("%j") %>">
+<article class="post <%= "withavatar" if post.avatar? %>" data-uid="<%= post.uid %>" data-id="<%= post.id %>" data-timestamp="<%= post.timestamp %>" data-page="<%= @page %>" data-doy="<%= post.created_at.strftime("%j") %>">
   <% if post.avatar? %>
     <div class="avatar <%= "approved" if post.approved_user? %>" style="background-image: url(<%= post.avatar_url %>)"></div>
   <% end %>
   <div class="body">
     <h1><a href="<%= post.url %>"><%= post.title %></a></h1>
     <p><%= post.lead_content %> <% if post.truncated? %><span class="more">[<a href="<%= post.url %>">more inside</a>]</span><% end %></p>
-    <div class="metadata"><% if post.author %><cite><i class="fa fa-user"></i> <%= post.author %></cite>&nbsp;&nbsp;<% end %><time><%= post.time %></time></div>
+    <div class="metadata"><% if post.author %><cite><i class="fa fa-user"></i> <%= post.author %></cite>&nbsp;&nbsp;<% end %><time><%= post.time %></time> <% if post.can_be_edited_by?(current_user) %><div class="tools post"><a href="<%= post.url %>?edit=true" class="edit">Edit</a> <a href="#" class="delete admin">Delete</a></div><% end %></div>
     <% if post.comments? %>
     	<% post.comments.to_a.last(4).each do |comment| %>
   			<%= erb :_inline_comment, locals: { comment: comment } %>

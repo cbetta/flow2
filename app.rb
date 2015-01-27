@@ -98,6 +98,10 @@ module Flow
       def with_avatar
         current_user && current_user.avatar?
       end
+
+      def admin?
+        current_user && current_user.admin?
+      end
     end
 
     before do
@@ -146,12 +150,18 @@ module Flow
     end
 
 
-
-
     # --- POSTING AND COMMENTING URLS
 
+    delete '/post/:uid' do
+      post = Post.find_where_editable_by(current_user, uid: params[:uid])
+      halt 404 unless post
+      post.delete
+      content_type :json
+      erb({ success: true }.to_json, layout: false)
+    end
+
     post '/post' do
-      post = Post.find_where_editable_by(current_user, id: params[:post_id]) if params[:post_id]
+      post = Post.find_where_editable_by(current_user, uid: params[:post_uid]) if params[:post_uid]
 
       if logged_in?
         post ||= Post.new

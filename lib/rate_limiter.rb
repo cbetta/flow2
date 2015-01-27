@@ -1,3 +1,4 @@
+# Provide a mechanism to rate limit anything using Redis
 module RateLimiter
   $redis ||= REDIS
 
