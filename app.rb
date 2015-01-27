@@ -26,8 +26,6 @@ require_relative 'models/post'
 require_relative 'models/comment'
 
 AUTH_PROVIDER = ENV['AUTH_PROVIDER'] || "GitHub"
-POST_ELEMENTS = %w{a em strong b br li ul ol p code tt samp}
-COMMENT_ELEMENTS = POST_ELEMENTS + %w{img}
 ABOUT_PAGE = Post[uid: 'about']
 DESCRIPTION_PAGE = Post[uid: 'description']
 

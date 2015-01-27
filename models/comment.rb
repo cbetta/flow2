@@ -1,5 +1,6 @@
 class Comment < Sequel::Model(DB[:comments])
   CONTENT_LENGTH_RANGE = 5..8192
+  ALLOWED_ELEMENTS = %w{a em strong b br li ul ol p code tt samp pre img}
 
   set_schema do
     primary_key :id
@@ -43,7 +44,7 @@ class Comment < Sequel::Model(DB[:comments])
 
   def rendered_content
     content = Kramdown::Document.new(self.content).to_html
-    cleaned = Sanitize.fragment(content, elements: COMMENT_ELEMENTS, attributes: { 'a' => %w{href title} })
+    cleaned = Sanitize.fragment(content, elements: ALLOWED_ELEMENTS, attributes: { 'a' => %w{href title} })
 
     if !self.user || !self.user.approved
       doc = Nokogiri::HTML::fragment(cleaned)

@@ -6,7 +6,8 @@ $background_color: #f5f6f6;
 $background_color_header: $theme_color;
 
 $fonts_headers: "proxima-nova", ubuntu, "helvetica neue", helvetica, sans-serif;
-$fonts: $fonts_headers, "Droid Sans Mono", "Cousinex", "Liberation Monox", "Source Code Prox", "Input Monox", Menlo, Consolas, "Ubuntu Mono", monospace;
+$fonts_mono: "Droid Sans Mono", "Cousinex", "Liberation Monox", "Source Code Prox", "Input Monox", Menlo, Consolas, "Ubuntu Mono", monospace;
+$fonts: $fonts_headers, $fonts_mono;
 $font_size: 16px;
 $line_height: 1.4em;
 $bold_weight: 600;
@@ -38,6 +39,16 @@ H1, H2, H3 {
 H3 { font-size: 1.3em; }
 
 A { color: $theme_color; }
+
+PRE CODE {
+  padding: 1em 2em;
+  display: block;
+  margin-right: 1em;
+  font-family: $fonts_mono;
+  font-size: 0.9em;
+  line-height: 1.6em;
+  background-color: #eff;
+}
 
 .inner {
   max-width: $inner_width;

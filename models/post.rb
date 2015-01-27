@@ -2,6 +2,7 @@ class Post < Sequel::Model(DB[:posts])
   CONTENT_LENGTH_RANGE = 10..10000
   TITLE_LENGTH_RANGE = 6..100
   POSTS_PER_PAGE = ENV['POSTS_PER_PAGE'] || 25
+  ALLOWED_ELEMENTS = %w{a em strong b br li ul ol p code tt samp pre}
 
   set_schema do
     primary_key :id
@@ -80,7 +81,7 @@ class Post < Sequel::Model(DB[:posts])
       content = content.split(/\<br|\n\n|\r\n\r\n/i).first
     end
 
-    cleaned = Sanitize.fragment(content, elements: %w{a em strong b}, attributes: { 'a' => %w{href title} })
+    cleaned = Sanitize.fragment(content, elements: %w{a em strong b code}, attributes: { 'a' => %w{href title} })
 
     if !self.user || !self.user.approved
       doc = Nokogiri::HTML::fragment(cleaned)
@@ -114,7 +115,7 @@ class Post < Sequel::Model(DB[:posts])
   def rendered_content
     return '' unless self.content
     content = Kramdown::Document.new(self.content).to_html
-    Sanitize.fragment(content, elements: POST_ELEMENTS, attributes: { 'a' => %w{href title} })
+    Sanitize.fragment(content, elements: ALLOWED_ELEMENTS, attributes: { 'a' => %w{href title} })
   end
 
   def comments?
