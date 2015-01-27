@@ -28,6 +28,10 @@ gem 'fastimage'
 gem 'aws-sdk'
 gem 'kronic'
 
+group :production do
+  gem 'newrelic_rpm'
+end
+
 group :development do
   gem 'dotenv'
   gem 'rack-test'

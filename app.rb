@@ -60,6 +60,8 @@ module Flow
         config.public_path = public_folder
         config.debug       = true if development?
       end
+
+      require 'newrelic_rpm' if ENV['NEW_RELIC_LICENSE_KEY'] && production?
     end
 
     helpers do
