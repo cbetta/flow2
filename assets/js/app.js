@@ -135,7 +135,7 @@ $(document).ready(function() {
     $('#sitedescription').show();
   }
 
-  $('#sitedescription').show();
+  // $('#sitedescription').show();
 
   function showSubmitForm() {
     $('#sitedescription').hide();
