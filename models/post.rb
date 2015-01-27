@@ -1,6 +1,6 @@
 class Post < Sequel::Model(DB[:posts])
   CONTENT_LENGTH_RANGE = 10..10000
-  TITLE_LENGTH_RANGE = 6..85
+  TITLE_LENGTH_RANGE = 6..100
 
   set_schema do
     primary_key :id
@@ -29,6 +29,7 @@ class Post < Sequel::Model(DB[:posts])
     self.uid ||= self.class.generate_unique_id
   end
 
+
   def self.generate_unique_id(length = 6)
     max = 36 ** length - 1        # e.g. "zzzzzz" in base 36
     min = 36 ** (length - 1)      # e.g. "100000" in base 36
@@ -48,7 +49,7 @@ class Post < Sequel::Model(DB[:posts])
   end
 
   def author
-    self.user ? self.user.username : self.byline ? self.byline : 'Anon'
+    self.user ? self.user.username.sub(/^__/, '') : self.byline ? self.byline : 'Anon'
   end
 
   def avatar_url
@@ -135,6 +136,7 @@ class Post < Sequel::Model(DB[:posts])
     if self.content && self.content.is_a?(String)
       errors.add(:content, 'Post is too short') if self.content.length < CONTENT_LENGTH_RANGE.min
       errors.add(:content, 'Post is too long') if self.content.length > CONTENT_LENGTH_RANGE.max
+      errors.add(:content, 'Your post contains no links') if !self.user.admin? && self.content !~ /\<a /i
     else
       errors.add(:content, 'No post body present')
     end

@@ -30,7 +30,7 @@ module Flow
     def import_users
       puts "Import users"
       i = 0
-      DB.run("DELETE FROM users")
+      DB.run("TRUNCATE users CASCADE")
       $db.execute("SELECT * FROM users ORDER BY id ASC") do |row|
         i += 1
         puts i if i % 100 == 0
@@ -58,7 +58,7 @@ module Flow
     def import_posts
       puts "Importing posts"
       i = 0
-      DB.run("DELETE FROM posts")
+      DB.run("TRUNCATE posts CASCADE")
       $db.execute("SELECT * FROM items ORDER BY id ASC") do |row|
         i += 1
         puts i if i % 100 == 0
@@ -67,6 +67,12 @@ module Flow
         p = Post.new
         p.uid = row['id']
         p.title = row['title']
+
+        if p.title.to_s.length > Post::TITLE_LENGTH_RANGE.max
+          p.title = p.title[0, Post::TITLE_LENGTH_RANGE.max]
+        elsif p.title.to_s.length < Post::TITLE_LENGTH_RANGE.min
+          p.title += " " * Post::TITLE_LENGTH_RANGE.min
+        end
 
         if row['user_id']
           p.user = $users[row['user_id']]
@@ -78,8 +84,10 @@ module Flow
         p.created_at = row['created_at']
         begin
           p.save
-        rescue
+        rescue => e
           puts "Skipping post #{p.uid} due to errors"
+          #p p.errors
+          #p e
         end
         $posts[row['id']] = p
       end
@@ -87,7 +95,7 @@ module Flow
 
     def import_comments
       puts "Importing comments"
-      DB.run("DELETE FROM comments")      
+      DB.run("TRUNCATE comments CASCADE")      
       i = 0
       $db.execute("SELECT * FROM comments ORDER BY id ASC") do |row|
         i += 1

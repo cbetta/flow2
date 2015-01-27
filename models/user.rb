@@ -49,4 +49,8 @@ class User < Sequel::Model(DB[:users])
   def display_name
     self.fullname || self.username
   end
+
+  def admin?
+    metadata['admin']
+  end
 end

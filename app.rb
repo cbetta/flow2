@@ -1,7 +1,6 @@
 require 'bundler/setup'
 Bundler.require
 
-require 'ohm'
 require 'sass'
 require 'sinatra/base'
 require 'sinatra/asset_pipeline'
@@ -115,7 +114,7 @@ module Flow
 
       @body_classes << 'index'
       determine_page
-      @posts = Post.all.sort(order: 'DESC', limit: [@offset, POSTS_PER_PAGE])
+      @posts = Post.reverse_order(:id).limit(POSTS_PER_PAGE).offset(@offset).all
 
       if request.xhr?
         erb :posts, layout: false
@@ -125,7 +124,7 @@ module Flow
     end
 
     get '/rss' do
-      @posts = Post.all.sort(order: 'DESC', limit: [0, POSTS_PER_PAGE])
+      @posts = Post.reverse_order(:id).limit(POSTS_PER_PAGE).offset(@offset).all
       content_type :rss
       builder :posts
     end
@@ -153,8 +152,10 @@ module Flow
     # --- POSTING AND COMMENTING URLS
 
     post '/post' do
+      post = Post.find_where_editable_by(current_user, id: params[:post_id]) if params[:post_id]
+
       if logged_in?
-        post = Post.new
+        post ||= Post.new
         post.title = params[:title]
         post.user = current_user
         post.content = params[:content]
@@ -164,12 +165,12 @@ module Flow
           halt erb({ errors: post.errors_list }.to_json, layout: false)
         end
 
-        post.save
-
         unless within_rate_limit(:posting, requests: 1, within: 10)
           content_type :json
           halt erb({ errors: [['content', 'You have posted within the past five minutes']] }.to_json, layout: false)
         end
+
+        post.save
 
         if request.xhr?
           content_type :json
@@ -185,12 +186,14 @@ module Flow
     end
 
     post '/comment' do
-      post = Post.find(uid: params[:post_id]).first
-      comment = Comment[]
+      post = Post.find(uid: params[:post_id])
+
+      comment = Comment.find_where_editable_by(current_user, id: params[:comment_id]) if params[:comment_id]
+        
       halt 400 unless post
 
       if logged_in?
-        comment = Comment.new
+        comment ||= Comment.new
         comment.user = current_user
         comment.post = post
         comment.content = params[:content]
@@ -239,7 +242,7 @@ module Flow
       halt 401 unless provider && uid && r['info']
 
       # Find if there's a user associated with the external ID being sent
-      u = User.find(external_uid: uid).first
+      u = User.find(external_uid: uid)
 
       # If there is, we're logged in, hurrah.
       if u

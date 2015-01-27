@@ -1,5 +1,5 @@
 class Comment < Sequel::Model(DB[:comments])
-  CONTENT_LENGTH_RANGE = 5..1024
+  CONTENT_LENGTH_RANGE = 5..8192
 
   set_schema do
     primary_key :id
@@ -12,13 +12,18 @@ class Comment < Sequel::Model(DB[:comments])
     foreign_key :user_id, :users
     foreign_key :post_id, :posts
 
-    constraint(:content_length_range, Sequel.function(:char_length, :content) => 5..4096)
+    constraint(:content_length_range, Sequel.function(:char_length, :content) => CONTENT_LENGTH_RANGE)
   end
 
   create_table unless table_exists?
 
   many_to_one :user
   many_to_one :post
+
+  def self.find_where_editable_by(user, conditions)
+    obj = find(conditions)
+    return obj if obj.user == user || user.admin?
+  end  
 
   def after_initialize
     self.created_at ||= Time.now

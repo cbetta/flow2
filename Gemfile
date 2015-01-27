@@ -6,10 +6,9 @@ gem 'puma'
 gem 'sinatra', github: 'sinatra/sinatra'
 gem 'sinatra-contrib'
 
-gem 'ohm'
-gem 'ohm-contrib'
 gem 'sequel'
 gem 'pg'
+gem 'redis'
 
 gem 'omniauth'
 gem 'omniauth-github'
