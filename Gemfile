@@ -8,6 +8,8 @@ gem 'sinatra-contrib'
 
 gem 'ohm'
 gem 'ohm-contrib'
+gem 'sequel'
+gem 'pg'
 
 gem 'omniauth'
 gem 'omniauth-github'

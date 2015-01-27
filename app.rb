@@ -16,19 +16,20 @@ if development?
   Dotenv.load
 end
 
-require_relative 'models/user'
-require_relative 'models/post'
-require_relative 'models/comment'
-
+require_relative 'config/sequel'
 require_relative 'config/redis'
 require_relative 'config/aws'
 require_relative 'lib/mirror_image'
 require_relative 'lib/rate_limiter'
 
+require_relative 'models/user'
+require_relative 'models/post'
+require_relative 'models/comment'
+
 AUTH_PROVIDER = ENV['AUTH_PROVIDER'] || "GitHub"
 POST_ELEMENTS = %w{a em strong b br li ul ol p code tt samp}
 COMMENT_ELEMENTS = POST_ELEMENTS + %w{img}
-ABOUT_PAGE_PRESENT = Post.find(uid: 'about').first
+ABOUT_PAGE_PRESENT = Post[uid: 'about']
 POSTS_PER_PAGE = ENV['POSTS_PER_PAGE'] || 25
 
 use OmniAuth::Builder do
@@ -135,7 +136,7 @@ module Flow
 
       id = params[:id].split('-').first
       @body_classes << 'post'
-      @post = Post.find(uid: id).first
+      @post = Post.find(uid: id)
 
       if @post
         @page_title = @post.title
@@ -160,7 +161,7 @@ module Flow
 
         unless post.valid?
           content_type :json
-          halt erb({ errors: post.errors }.to_json, layout: false)
+          halt erb({ errors: post.errors_list }.to_json, layout: false)
         end
 
         post.save
@@ -185,6 +186,7 @@ module Flow
 
     post '/comment' do
       post = Post.find(uid: params[:post_id]).first
+      comment = Comment[]
       halt 400 unless post
 
       if logged_in?
@@ -195,7 +197,7 @@ module Flow
 
         unless comment.valid?
           content_type :json
-          halt erb({ errors: comment.errors }.to_json, layout: false)
+          halt erb({ errors: comment.errors_list }.to_json, layout: false)
         end
 
         comment.save
@@ -247,7 +249,8 @@ module Flow
         begin
           u = User.new
           u.username = r['info']['nickname']
-          u.set_metadata email: r['info']['email'], provider: provider
+          u.email = r['info']['email']
+          u.metadata['provider'] = provider
           u.external_uid = uid
           u.external_token = r['credentials']['token']
           u.fullname = r['info']['name']

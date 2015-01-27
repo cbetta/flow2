@@ -1,40 +1,34 @@
 require 'digest/md5'
 require 'uri'
 
-class User < Ohm::Model
-  include Ohm::DataTypes
-  include Ohm::Callbacks
+class User < Sequel::Model(DB[:users])
+  USERNAME_LENGTH_RANGE = 1..32
+  EMAIL_LENGTH_RANGE = 6..100
 
-  attribute :username
-  unique :username
+  set_schema do
+    primary_key :id
+    String :username, index: true, unique: true
+    String :email
+    String :fullname
+    TrueClass :approved, default: false
+    String :external_uid, index: true, unique: true
+    String :external_token
+    String :avatar_url
+    Time :created_at
+    HStore :metadata
 
-  attribute :email
-  attribute :fullname
-  attribute :approved
-
-  attribute :external_uid
-  index :external_uid
-
-  attribute :external_token
-
-  attribute :avatar_url
-  collection :posts, :Post
-  collection :comments, :Comment
-  attribute :created_at, Type::Time
-  attribute :metadata, Type::Hash
-
-  def set_metadata(hsh)
-    self.metadata ||= {}
-    self.metadata = self.metadata.merge hsh.map { |k, v| [k.to_s, v] }.to_h
+    constraint(:username_length_range, Sequel.function(:char_length, :username) => USERNAME_LENGTH_RANGE)
+    constraint(:email_length_range, Sequel.function(:char_length, :email) => EMAIL_LENGTH_RANGE)
   end
 
-  def get_metadata(key)
-    self.metadata[key.to_s]
-  end
+  create_table unless table_exists?
 
-  def before_create
+  one_to_many :posts
+  one_to_many :comments
+
+  def after_initialize
     self.created_at ||= Time.now
-    self.metadata ||= {}
+    self.metadata ||= Sequel.hstore({})
   end
 
   def gravatar_url

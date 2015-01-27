@@ -1,26 +1,31 @@
-class Post < Ohm::Model
-  include Ohm::DataTypes
-  include Ohm::Callbacks
+class Post < Sequel::Model(DB[:posts])
+  CONTENT_LENGTH_RANGE = 10..10000
+  TITLE_LENGTH_RANGE = 6..85
 
-  attribute :uid
-  index :uid
+  set_schema do
+    primary_key :id
+    String :uid, index: true, unique: true
+    String :slug
+    String :title
+    String :content, text: true
+    String :byline
+    Time :created_at
+    HStore :metadata
 
-  attribute :slug
-  attribute :title
-  attribute :content
-  reference :user, :User
-  collection :comments, :Comment
-  attribute :byline
-  attribute :created_at, Type::Time
-  attribute :metadata, Type::Hash
+    foreign_key :user_id, :users
 
-  MIN_LENGTH = 10
-  MAX_LENGTH = 10000
+    constraint(:title_length_range, Sequel.function(:char_length, :title) => TITLE_LENGTH_RANGE)
+    constraint(:content_length_range, Sequel.function(:char_length, :content) => CONTENT_LENGTH_RANGE)
+  end
 
+  create_table unless table_exists?
 
-  def before_create
+  many_to_one :user
+  one_to_many :comments
+
+  def after_initialize
     self.created_at ||= Time.now
-    self.metadata ||= {}
+    self.metadata ||= Sequel.hstore({})
     self.uid ||= self.class.generate_unique_id
   end
 
@@ -30,7 +35,7 @@ class Post < Ohm::Model
 
     loop do
       uid = (SecureRandom.random_number(max - min) + min).to_s(36)
-      return uid unless find(uid: uid).first
+      return uid unless find(uid: uid)
     end
   end
 
@@ -124,26 +129,21 @@ class Post < Ohm::Model
     ''
   end
 
-  def valid?
-    if self.content
-      errors << ['content', "Post is too short (#{MIN_LENGTH} chars min)"] if self.content.to_s.length < MIN_LENGTH
-      errors << ['content', "Post is too long (#{MAX_LENGTH} chars max)"] if self.content.to_s.length > MAX_LENGTH
-      errors << ['content', "Post doesn't contain any links"] if self.rendered_content !~ /<a /i
+  def validate
+    super
+
+    if self.content && self.content.is_a?(String)
+      errors.add(:content, 'Post is too short') if self.content.length < CONTENT_LENGTH_RANGE.min
+      errors.add(:content, 'Post is too long') if self.content.length > CONTENT_LENGTH_RANGE.max
     else
-      errors << ['content', "No post body present"]
+      errors.add(:content, 'No post body present')
     end
 
-    if self.title
-      errors << ['title', "Title is too short"] if self.title.to_s.length < 6
-      errors << ['title', "Title is too long"] if self.title.to_s.length > 85
+    if self.title && self.title.is_a?(String)
+      errors.add(:title, 'Title is too short') if self.title.length < TITLE_LENGTH_RANGE.min
+      errors.add(:title, 'Title is too long') if self.title.length > TITLE_LENGTH_RANGE.max
     else
-      errors << ['title', "No title present"]
+      errors.add(:title, 'Title is not present')
     end
-
-    errors.length == 0
-  end
-
-  def errors
-    @errors ||= []
   end
 end

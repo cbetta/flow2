@@ -1,6 +1,8 @@
 require 'sqlite3'
 
 module Flow
+  # Import old flow site data from an SQLite3 database
+  # Hey, somehow SQLite3 survived in production on rubyflow.com for 6 years! :-)
   module Import
     module_function
 
@@ -28,17 +30,27 @@ module Flow
     def import_users
       puts "Import users"
       i = 0
+      DB.run("DELETE FROM users")
       $db.execute("SELECT * FROM users ORDER BY id ASC") do |row|
         i += 1
         puts i if i % 100 == 0
         u = User.new
         u.username = "__" + row['login']   # append double underscore so 'old' style users are still around, but not conflicting with new ones
+
         u.email = row['email']
-        u.set_metadata url: row['url'], crypted_password: row['crypted_password'], salt: row['salt']
-        u.set_metadata admin: true if row['admin'] == 1
+        u.email = nil if u.email && u.email.length < User::EMAIL_LENGTH_RANGE.min
+
+        u.metadata[:url] = row['url']
+        u.metadata[:crypted_password] = row['crypted_password']
+        u.metadata[:salt] = row['salt']
+        u.metadata[:admin] = true if row['admin'] == 1
         u.approved = row['approved_for_feed'] == 1
         u.created_at = row['created_at']
-        u.save
+        begin
+          u.save
+        rescue
+          puts "Skipping duplicate user #{u.username}"
+        end
         $users[row['id']] = u
       end
     end
@@ -46,6 +58,7 @@ module Flow
     def import_posts
       puts "Importing posts"
       i = 0
+      DB.run("DELETE FROM posts")
       $db.execute("SELECT * FROM items ORDER BY id ASC") do |row|
         i += 1
         puts i if i % 100 == 0
@@ -63,13 +76,18 @@ module Flow
 
         p.content = row['content']
         p.created_at = row['created_at']
-        p.save
+        begin
+          p.save
+        rescue
+          puts "Skipping post #{p.uid} due to errors"
+        end
         $posts[row['id']] = p
       end
     end
 
     def import_comments
       puts "Importing comments"
+      DB.run("DELETE FROM comments")      
       i = 0
       $db.execute("SELECT * FROM comments ORDER BY id ASC") do |row|
         i += 1
@@ -86,7 +104,12 @@ module Flow
 
         c.post = $posts[row['item_id']]
         c.created_at = row['created_at']
-        c.save
+        begin
+          c.save
+        rescue
+          puts "Skipping comment #{row['id']} due to errors"
+        end
+
       end
     end
   end

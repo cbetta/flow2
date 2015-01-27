@@ -1,20 +1,28 @@
-class Comment < Ohm::Model
-  include Ohm::DataTypes
-  include Ohm::Callbacks
+class Comment < Sequel::Model(DB[:comments])
+  CONTENT_LENGTH_RANGE = 5..1024
 
-  attribute :content
-  attribute :byline
-  reference :post, :Post
-  reference :user, :User
-  attribute :created_at, Type::Time
-  attribute :metadata, Type::Hash
+  set_schema do
+    primary_key :id
 
-  MIN_LENGTH = 10
-  MAX_LENGTH = 4096
+    String :content, text: true
+    String :byline
+    Time :created_at
+    HStore :metadata
 
-  def before_create
+    foreign_key :user_id, :users
+    foreign_key :post_id, :posts
+
+    constraint(:content_length_range, Sequel.function(:char_length, :content) => 5..4096)
+  end
+
+  create_table unless table_exists?
+
+  many_to_one :user
+  many_to_one :post
+
+  def after_initialize
     self.created_at ||= Time.now
-    self.metadata ||= {}
+    self.metadata ||= Sequel.hstore({})
   end
 
   def timestamp
@@ -55,18 +63,14 @@ class Comment < Ohm::Model
     self.user ? self.user.username : self.byline ? self.byline : 'Anon'
   end
 
-  def valid?
-    if self.content
-      errors << ['content', "Your comment is too short (#{MIN_LENGTH} chars min)"] if self.content.to_s.length < MIN_LENGTH
-      errors << ['content', "Your comment is too long (#{MAX_LENGTH} chars max)"] if self.content.to_s.length > MAX_LENGTH
+  def validate
+    super
+
+    if self.content && self.content.is_a?(String)
+      errors.add(:content, 'Your comment is too short') if self.content.length < CONTENT_LENGTH_RANGE.min
+      errors.add(:content, 'Your comment is too long') if self.content.length > CONTENT_LENGTH_RANGE.max
     else
-      errors << ['content', "No post body present"]
+      errors.add(:content, 'No comment body present')
     end
-
-    errors.length == 0
-  end
-
-  def errors
-    @errors ||= []
   end
 end
