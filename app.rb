@@ -30,8 +30,8 @@ ABOUT_PAGE = Post[uid: 'about']
 DESCRIPTION_PAGE = Post[uid: 'description']
 
 use OmniAuth::Builder do
-  provider :github, ENV['GITHUB_KEY'], ENV['GITHUB_SECRET'], scope: 'user:email' if AUTH_PROVIDER.downcase == 'github'
-  provider :twitter, ENV['TWITTER_KEY'], ENV['TWITTER_SECRET'], scope: 'user:email' if AUTH_PROVIDER.downcase == 'twitter'
+  provider(:github, ENV['GITHUB_KEY'], ENV['GITHUB_SECRET'], 'scope' => 'user:email') if AUTH_PROVIDER.downcase == 'github'
+  provider(:twitter, ENV['TWITTER_KEY'], ENV['TWITTER_SECRET'], 'scope' => 'user:email') if AUTH_PROVIDER.downcase == 'twitter'
 end
 
 module Flow
