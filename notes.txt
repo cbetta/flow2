@@ -11,6 +11,12 @@ s3.buckets[bucket_name].objects[key].write(:file => file_name)
 puts "Uploading file #{file_name} to bucket #{bucket_name}."
 
 
+pg_dump -Fc --no-acl --no-owner  flow2 > ~/Sandbox/flow2.dump
+scp ~/Sandbox/flow2.dump victory:/home/nogd/www/flow2.dump
+heroku pgbackups:restore DATABASE 'http://no.gd/flow2.dump'
+
+
+
 
 (function poll(){
    setTimeout(function(){

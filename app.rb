@@ -106,6 +106,16 @@ module Flow
     before do
       # Classes we might wish to set on the <body> tag
       @body_classes = []
+
+      # If the URL is www, redirect any non-www variants to it
+      if ENV['BASE_URL'] =~ /\/\/www\./ && request.host !~ /^www/
+        redirect request.url.sub(/\/\//, '//www.'), 301
+      end
+
+      # And vice versa (www to non-www)
+      if ENV['BASE_URL'] !~ /\/\/www\./ && request.host =~ /^www/
+        redirect request.url.sub(/www\./, ''), 301
+      end
     end
 
     # Homepage
@@ -336,16 +346,27 @@ module Flow
     # --- COMPATIBILITY URLS
 
     # For compatibility with old flow sites for SEO/usability purposes
+    get '/page/:page' do
+      redirect(ENV['BASE_URL'] + "?page=" + params[:page], 301)
+    end
+
     get '/items/:id' do
-      redirect %{/p/#{params[:id]}}
+      redirect(ENV['BASE_URL'] + %{/p/#{params[:id]}}, 301)
     end
 
     get '/users/:id' do
-      redirect %{/}
+      flash[:warning] = "User profile pages are not currently available, they will return soon"
+      redirect ENV['BASE_URL']
     end
 
     get '/signup' do
-      redirect %{/}
+      flash[:notice] = "You no longer need to sign up, just start posting"
+      redirect ENV['BASE_URL']
+    end
+
+    get '/login' do
+      flash[:notice] = "You no longer need to log in, it happens automatically when you try to do something"
+      redirect ENV['BASE_URL']
     end
 
     # If this is being run directly, let it serve the app up

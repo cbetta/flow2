@@ -47,7 +47,7 @@ class User < Sequel::Model(DB[:users])
   def avatar?; avatar end
 
   def display_name
-    self.fullname || (self.username && self.username.sub(/^__/, '')) || "Unknown"
+    (self.fullname && self.fullname.to_s.length > 3) || (self.username && self.username.sub(/^__/, '')) || "Unknown"
   end
 
   # Is the user an admin?
