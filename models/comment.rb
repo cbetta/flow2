@@ -34,7 +34,13 @@ class Comment < Sequel::Model
 
   # The comment's content rendered from Markdown through to HTML and sanitized
   def rendered_content
-    content = Kramdown::Document.new(self.content).to_html
+    content = self.content
+
+    # Expand links on their own to being links in Markdown (by surrounding with <>)
+    content.gsub!(/(^|\s)(https?\:\/\/[^\s\>]*)($|\s)/, '\1<\2>\3')
+
+    # Render any Markdown and then sanitize the HTML output
+    content = Kramdown::Document.new(content).to_html
     cleaned = Sanitize.fragment(content, elements: ALLOWED_ELEMENTS, attributes: { 'a' => %w{href title} })
 
     # Change links to have rel='nofollow' (to help with spam) if it's from a non-approved user

@@ -98,6 +98,7 @@ class Post < Sequel::Model
     content_parts.length > 1
   end
 
+  # A description for meta tag use
   def description
     Sanitize.fragment(lead_content).gsub(/[^A-Za-z0-9 '-.,?_+"]/, '').gsub(/\s+/, ' ').strip
   end
@@ -105,7 +106,12 @@ class Post < Sequel::Model
   # The post's content rendered from Markdown through to HTML and sanitized
   def rendered_content
     return '' unless self.content
-    content = Kramdown::Document.new(self.content).to_html
+    content = self.content
+
+    # Expand links on their own to being links in Markdown (by surrounding with <>)
+    content.gsub!(/(^|\s)(https?\:\/\/[^\s\>]*)($|\s)/, '\1<\2>\3')
+
+    content = Kramdown::Document.new(content).to_html
     cleaned = Sanitize.fragment(content, elements: ALLOWED_ELEMENTS, attributes: ALLOWED_ATTRIBUTES)
 
     # Change links to have rel='nofollow' (to help with spam) if it's from a non-approved user
