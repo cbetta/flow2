@@ -257,7 +257,7 @@ module Flow
           halt erb({ errors: comment.errors_list }.to_json, layout: false)
         end
 
-        unless within_rate_limit(:commenting, requests: 4, within: 120)
+        unless within_rate_limit(:commenting, requests: 6, within: 120)
           content_type :json
           halt erb({ errors: [['content', 'Slow down the commenting a little']] }.to_json, layout: false)
         end

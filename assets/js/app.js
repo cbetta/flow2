@@ -50,7 +50,7 @@ $(document).ready(function() {
   $('.postbox FORM').sisyphus({ autoRelease: false });
 
   // Deleting posts
-  $('section.posts').on('click', '.tools A.delete', function(e) {
+  $('section.posts').on('click', '.tools A.deletepost', function(e) {
     var el = $(this).closest('article.post');
     var uid = el.data('uid');
     if (confirm('Delete this post?')) {
@@ -68,7 +68,7 @@ $(document).ready(function() {
 
   // Deleting posts from within the post itself
   // This is getting a bit ugly, but hey ho, refactor later!
-  $('BODY.post ARTICLE.post > .body .metadata .tools A.delete').click(function(e) {
+  $('BODY.post ARTICLE.post > .body .metadata .tools A.deletepost').click(function(e) {
     var el = $(this).closest('article.post');
     var uid = el.data('uid');
     if (confirm('Delete this post?')) {
@@ -84,7 +84,7 @@ $(document).ready(function() {
   });  
 
   // Deleting comments
-  $('section.comments').on('click', '.tools A.delete', function(e) {
+  $('section.comments').on('click', '.tools A.deletecomment', function(e) {
     var el = $(this).closest('div.comment');
     var id = el.data('id');
 
