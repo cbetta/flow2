@@ -11,9 +11,9 @@ A simple blogging / linklogging tool for communities. Used to run http://rubyflo
 
 You need to have these things:
 
-* Redis
 * Postgres (9.3 fine for now)
 * an account at Twitter or GitHub to create an 'app' for OAuth usage there
+* Redis (you *can* run without it but you'll get no rate limiting or caching)
 
 In production, use Heroku plus their Postgres service and the Redis Cloud service. You can run a simple flow2 install entirely for free this way but then have the option to scale up in future.
 

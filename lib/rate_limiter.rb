@@ -3,6 +3,9 @@ module RateLimiter
   $redis ||= REDIS
 
   def within_rate_limit(key = :default, requests: 3, within: 240)
+    # No Redis? No rate limiting :-(
+    return true unless $redis
+
     # Create a key that uses the client's IP
     rate_key = 'rate:' + key.to_s + ':' + (defined?(request) ? request.ip : 'localhost')
 

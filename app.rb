@@ -134,6 +134,7 @@ module Flow
       if request.xhr?
         erb :posts, layout: false
       else
+        # TODO: Hook up caching within the templates
         erb :index
       end
     end
@@ -141,7 +142,7 @@ module Flow
     get '/rss' do
       @posts = Post.recent_from_offset(@offset)
       content_type :rss
-      builder :posts
+      Cache[:posts_rss] ||= builder :posts
     end
 
     # Show an individual post's page
@@ -162,6 +163,7 @@ module Flow
         status 404
       end
 
+      # TODO: Hook up caching within the templates
       erb :post
     end
 
@@ -174,6 +176,9 @@ module Flow
       post = Post.find_where_editable_by(current_user, uid: params[:uid])
       halt 404 unless post
       post.delete
+
+      Cache.expire(:front_page)
+
       content_type :json
       erb({ success: true }.to_json, layout: false)
     end
@@ -182,6 +187,9 @@ module Flow
       comment = Comment.find_where_editable_by(current_user, id: params[:id])
       halt 404 unless comment
       comment.delete
+
+      Cache.expire(:front_page)
+
       content_type :json
       erb({ success: true }.to_json, layout: false)
     end
@@ -212,6 +220,8 @@ module Flow
         end
 
         post.save
+        Cache.expire(:front_page)
+        Cache.expire('post:' + post.uid)
 
         flash[:notice] = "Your post has been saved - thanks!"
 
@@ -252,6 +262,7 @@ module Flow
         end
 
         comment.save
+        Cache.expire('post:' + comment.post.uid)      
 
         flash[:notice] = "Your comment has been posted - thanks!"
 

@@ -8,7 +8,11 @@
 </div>
 
 <section class="inner posts">
-	<%= erb :posts %>
+	<% if @page == 1 && !current_user %>
+		<%= Cache[:front_page] ||= erb :posts %>
+	<% else %>
+		<%= erb :posts %>
+	<% end %>
 </section>
 
 <div id="loading"><i class="fa fa-spinner fa-pulse"></i> Loading older posts <i class="fa fa-spinner fa-pulse"></i></div>
