@@ -68,6 +68,8 @@ Things to consider:
 
 ### The actual process
 
+Deploying on Heroku is pretty easy. 
+
     git clone git@github.com:peterc/flow2.git yourflow
     cd yourflow
     heroku apps:create yourflow
@@ -76,10 +78,10 @@ Things to consider:
     heroku config:set RACK_ENV=production
     heroku config:set AUTH_PROVIDER=GitHub GITHUB_KEY=... GITHUB_SECRET=...
     heroku config:set BASE_URL=http://yourflow.herokuapp.com/
-
-Eventually, you can just do this:
-
     git push heroku master
+    heroku open
+
+*Note: Be sure to replace `yourflow` with a more specific name for your own site ;-)*
 
 ## TODOs
 

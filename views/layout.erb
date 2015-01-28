@@ -9,7 +9,9 @@
   <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
   <%= Rack::Csrf.metatag(env) %>
   <link rel="alternate" type="application/rss+xml" title="Feed" href="<%= ENV['BASE_URL'] %>/rss">
-  <script src="//use.typekit.net/cap5cqx.js"></script><script>try{Typekit.load();}catch(e){}</script>
+  <% if ENV['TYPEKIT_ID'] %><script src="//use.typekit.net/<%= ENV['TYPEKIT_ID'] %>.js"></script><script>try{Typekit.load();}catch(e){}</script><% end %>
+  <% if STYLESHEETS %><% [*STYLESHEETS].each do |sheet| %><link rel="stylesheet" href="<%= sheet %>" type="text/css">
+  <% end %><% end %>
 </head>
 <body class="<%= @body_classes.join(' ') %> <%= 'oauth-successful' if flash[:oauth_successful] %> <%= 'admin' if admin? %>">
   <header class="top">

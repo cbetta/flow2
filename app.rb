@@ -35,6 +35,8 @@ AUTH_PROVIDER = ENV['AUTH_PROVIDER'] || "GitHub"
 ABOUT_PAGE = Post[uid: 'about']
 DESCRIPTION_PAGE = Post[uid: 'description']
 
+STYLESHEETS = Config[:stylesheets]
+
 SITE_NAME = Config[:site_name] || ENV['SITE_NAME'] || "flow2"
 SITE_DESCRIPTION = Config[:site_description] || ENV['SITE_DESCRIPTION'] || "a linkflow site"
 
@@ -327,7 +329,9 @@ module Flow
 
           u.save
 
-          u.admin! if User.count == 0
+          # If the user is the first user in the entire system, make them an admin
+          u.admin! if User.count == 1
+
           session[:logged_in] = u.id
         rescue
           # If all else fails, I'm a Teapot.
