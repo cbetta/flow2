@@ -10,9 +10,9 @@ class Config < Sequel::Model
 
   def self.[](key)
   	@cache = {} unless ENV['RACK_ENV'] == 'production'
-  	if val = super(key.to_s)
-	  	@cache[key.to_sym] ||= val.value
-	  end
+  	c = @cache[key.to_sym]
+  	return c if c
+  	@cache[key.to_sym] = super(key.to_s) && super(key.to_s).typed_value
   end
 
   def self.[]=(key, val)
@@ -23,15 +23,17 @@ class Config < Sequel::Model
 
   	obj.value = val
   	obj.save
-  	@cache[key.to_sym] = obj.value
+  	@cache[key.to_sym] = obj.typed_value
   end
 
   # We could use Postgres' built in array or json types here, but
   # we'll do it the cheap way as it's only for config information anyway
-  def value
-  	val = super
+  def typed_value
+  	val = value
   	if val && (val.start_with?('{') || val.start_with?('['))
   		return JSON.parse(val)
+  	elsif val.to_i.to_s == val
+  		return Integer(val)
   	end
   	val
   end

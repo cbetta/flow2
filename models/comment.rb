@@ -2,9 +2,9 @@ class Comment < Sequel::Model
   include Concerns::Content
   include Concerns::Validations
 
-  CONTENT_LENGTH_RANGE = 5..8192
-  INLINE_MAX_LENGTH = 80
-  ALLOWED_ELEMENTS = %w{a em strong b br li ul ol p code tt samp pre img}
+  CONTENT_LENGTH_RANGE = 5..(Config[:comment_max_length] || 8192)
+  INLINE_MAX_LENGTH = Config[:comment_inline_max_length] || 80
+  ALLOWED_ELEMENTS = Config[:comment_allowed_elements] || %w{a em strong b br li ul ol p code tt samp pre img}
 
   set_schema do
     primary_key :id

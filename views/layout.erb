@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0" />
-  <title><%= @page_title ? @page_title + " - " + ENV['SITE_NAME'] : ENV['SITE_NAME'] %></title>
-  <meta name="description" content="<%= @post ? @post.description : ENV['SITE_DESCRIPTION'] %>">
+  <title><%= @page_title ? @page_title + " - " + SITE_NAME : SITE_NAME %></title>
+  <meta name="description" content="<%= @post ? @post.description : SITE_DESCRIPTION %>">
   <%= stylesheet_tag 'app' %>
   <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
   <%= Rack::Csrf.metatag(env) %>
@@ -18,15 +18,15 @@
         <ul>
           <% if logged_in? %>
             <li><div class="avatar small" style="background-image: url(<%= current_user.avatar_url %>)"></div></li>
-            <li><a href="/logout" title="Sign out"><i class="fa fa-sign-out"></i><span class="optional">Sign out</span></a></li>
+            <li class="signout"><a href="/logout" title="Sign out"><i class="fa fa-sign-out"></i><span class="optional">Sign out</span></a></li>
           <% end %>
-          <li><a href="/rss" title="RSS feed"><i class="fa fa-rss"></i><span class="optional">RSS</span></a></li>
-          <% if ENV['TWITTER_USERNAME'] %><li><a href="https://twitter.com/<%= ENV['TWITTER_USERNAME'] %>" title="Twitter"><i class="fa fa-twitter"></i><span class="optional">Twitter</span></a></li><% end %>
-          <% if ABOUT_PAGE %><li><a href="<%= ABOUT_PAGE.url %>" title="About"><i class="fa fa-question"></i><span class="optional"><%= ABOUT_PAGE.title %></span></a></li><% end %>
-          <li><a href="#submitform" class="submit" title="Submit a post"><i class="fa fa-plus"></i><span class="optional">Submit</span></a></li>
+          <li class="rss"><a href="/rss" title="RSS feed"><i class="fa fa-rss"></i><span class="optional">RSS</span></a></li>
+          <% if Config[:twitter_username] %><li class="twitter"><a href="https://twitter.com/<%= Config[:twitter_username] %>" title="Twitter"><i class="fa fa-twitter"></i><span class="optional">Twitter</span></a></li><% end %>
+          <% if ABOUT_PAGE %><li class="about"><a href="<%= ABOUT_PAGE.url %>" title="About"><i class="fa fa-question"></i><span class="optional"><%= ABOUT_PAGE.title[0,12] %></span></a></li><% end %>
+          <li class="submit"><a href="#submitform" class="submit" title="Submit a post"><i class="fa fa-plus"></i><span class="optional">Submit</span></a></li>
         </ul>
       </div>
-      <h1><a href="/" title="Homepage"><%= ENV['SITE_NAME'] %></a> <span><%= ENV['SITE_DESCRIPTION'] %></span></h1>
+      <h1><a href="/" title="Homepage"><%= SITE_NAME %></a> <span><%= SITE_DESCRIPTION %></span></h1>
     </div>
   </header>
 

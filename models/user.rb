@@ -2,7 +2,7 @@ require 'digest/md5'
 require 'uri'
 
 class User < Sequel::Model(DB[:users])
-  USERNAME_LENGTH_RANGE = 1..32
+  USERNAME_LENGTH_RANGE = (Config[:username_min_length] || 1)..(Config[:username_max_length] || 32)
   EMAIL_LENGTH_RANGE = 6..100
 
   set_schema do

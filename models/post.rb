@@ -2,11 +2,13 @@ class Post < Sequel::Model
   include Concerns::Content
   include Concerns::Validations
 
-  CONTENT_LENGTH_RANGE = 10..10000
-  TITLE_LENGTH_RANGE = 6..100
-  POSTS_PER_PAGE = ENV['POSTS_PER_PAGE'] || 25
-  ALLOWED_ELEMENTS = %w{a em strong b br li ul ol p code tt samp pre}
+  CONTENT_LENGTH_RANGE = 10..(Config[:post_max_length] || 10000)
+  TITLE_LENGTH_RANGE = 6..(Config[:post_title_max_length] || 100)
+  POSTS_PER_PAGE = Config[:posts_per_page] || 25
+  ALLOWED_ELEMENTS = Config[:post_allowed_elements] || %w{a em strong b br li ul ol p code tt samp pre}
+  LEAD_ALLOWED_ELEMENTS = Config[:post_lead_allowed_elements] || %w{a em strong b code}
   ALLOWED_ATTRIBUTES = { 'a' => %w{href title} }
+  UID_LENGTH = Config[:uid_length] || 6
 
   set_schema do
     primary_key :id
@@ -43,7 +45,7 @@ class Post < Sequel::Model
   end
 
   # Generate a unique ID (used instead of a number in URLs)
-  def self.generate_unique_id(length = 6)
+  def self.generate_unique_id(length = UID_LENGTH)
     max = 36 ** length - 1        # e.g. "zzzzzz" in base 36
     min = 36 ** (length - 1)      # e.g. "100000" in base 36
 
@@ -86,7 +88,7 @@ class Post < Sequel::Model
     content = content_parts.first.to_s
 
     # Tighter restrictions on front page excerpts than elsewhere
-    content = Sanitize.fragment(content, elements: %w{a em strong b code}, attributes: ALLOWED_ATTRIBUTES)
+    content = Sanitize.fragment(content, elements: LEAD_ALLOWED_ELEMENTS, attributes: ALLOWED_ATTRIBUTES)
 
     # Change links to have rel='nofollow' (to help with spam) if it's from a non-approved user
     content = Sanitize.nofollow_links(content) if !self.user || (!self.user.approved && !self.user.admin?)

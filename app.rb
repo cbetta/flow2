@@ -35,15 +35,18 @@ AUTH_PROVIDER = ENV['AUTH_PROVIDER'] || "GitHub"
 ABOUT_PAGE = Post[uid: 'about']
 DESCRIPTION_PAGE = Post[uid: 'description']
 
+SITE_NAME = Config[:site_name] || ENV['SITE_NAME'] || "flow2"
+SITE_DESCRIPTION = Config[:site_description] || ENV['SITE_DESCRIPTION'] || "a linkflow site"
+
 module Flow
   class App < Sinatra::Base
     configure do
       use Rack::Deflater
       use Rack::Session::Cookie,
-                     :key => 'flow.session',
+                     :key => (Config[:cookie_key]  || 'flow.session'),
                      :path => '/',
-                     :expire_after => 86400 * 60,
-                     :secret => ENV["SECRET"] || "somethingsecrethere"
+                     :expire_after => (Config[:cookie_timeout] || 86400 * 90),
+                     :secret => ENV["SECRET"] || "put something rather unique here"
 
       register Sinatra::AssetPipeline
       set :sprockets, Sprockets::Environment.new(root)
@@ -136,7 +139,6 @@ module Flow
       if request.xhr?
         erb :posts, layout: false
       else
-        # TODO: Hook up caching within the templates
         erb :index
       end
     end
@@ -165,7 +167,6 @@ module Flow
         status 404
       end
 
-      # TODO: Hook up caching within the templates
       erb :post
     end
 
@@ -325,11 +326,22 @@ module Flow
           end
 
           u.save
+
+          u.admin! if User.count == 0
           session[:logged_in] = u.id
         rescue
           # If all else fails, I'm a Teapot.
           # TODO: This may occur if the username is not unique, so deal with it better!
           halt 418
+
+          # OK, in reality, the main reason this error would occur is
+          # because the UID at the auth provider is different to what we have
+          # stored. This should never change but could if you switched auth
+          # providers. So in this situation, we'd probably need to either:
+          #   - update the UID on the record based on the username
+          #   - create a record with a slightly different username
+          #   - ask the user what to do
+          # Ideas on a postcard, please.
         end
       end
 
@@ -338,6 +350,10 @@ module Flow
 
       if session[:return_to].to_s =~ /submitform/
         flash[:notice] = "You are now logged in and can submit your post to the site"
+      end
+
+      if u.admin?
+        flash[:warning] = "Please note that you are an admin"
       end
 
       flash[:oauth_successful] = true

@@ -2,24 +2,24 @@
 
 // OK. This file is a REAL MESS. Judge silently ;-)
 // This is where I plan to do a lot of refactoring
-// to support people easily creating their own flow sites.
+// to support people more easily creating their own flow sites.
 
-$theme_color: #c00;
-$text_color: #424242;
-$background_color: #f5f6f6;
-$background_color_header: $theme_color;
+$theme_color: <%= Config[:theme_color] || "#090" %>;
+$text_color: <%= Config[:text_color] || "#424242" %>;
+$background_color: <%= Config[:background_color] || "#f5f6f6" %>;
+$background_color_header: <%= Config[:header_background_color] || "$theme_color" %>;
+$error_background_color: <%= Config[:error_background_color] || "#fee" %>;
 
-$fonts_headers: "proxima-nova", ubuntu, "helvetica neue", helvetica, sans-serif;
+$fonts_headers: <%= Config[:header_fonts] || %{"proxima-nova", ubuntu, "helvetica neue", helvetica, sans-serif} %>;
 $fonts_mono: "Droid Sans Mono", "Cousinex", "Liberation Monox", "Source Code Prox", "Input Monox", Menlo, Consolas, "Ubuntu Mono", monospace;
-$fonts: $fonts_headers, $fonts_mono;
-$font_size: 16px;
-$line_height: 1.4em;
-$bold_weight: normal;
+$fonts: <%= Config[:fonts] || %{$fonts_headers, $fonts_mono} %>;
+$font_size: <%= Config[:font_size] || "16px" %>;
+$line_height: <%= Config[:line_height] || "1.4em" %>;
+$bold_weight: <%= Config[:bold_weight] || "normal" %>;
 
 $top_padding: 84px;
-$inner_width: 50em;
-$avatar_size: 48px;
-$post_padding: $avatar_size / 1.5;
+$inner_width: <%= Config[:inner_width] || "50em" %>;
+$avatar_size: <%= Config[:avatar_width] || "48px" %>;
 
 BODY {
   font-family: $fonts;
@@ -70,7 +70,7 @@ HEADER.top {
   z-index: 100;
   width: 100%;
   background-color: $background_color_header;
-  border-bottom: 1px solid #800;
+  border-bottom: 1px solid darken($theme_color, 8%);
 
   .inner { margin-top: 14px; margin-bottom: 14px; padding-right: 0; }
 
@@ -97,7 +97,6 @@ HEADER.top {
     SPAN { display: none; }
     color: #fff;
     font-weight: $bold_weight;
-    font-weight: normal;  // just trying this temporarily
 
     A:hover { margin-left: -8px; }
   }
@@ -135,7 +134,6 @@ HEADER.top {
 
 ARTICLE.post {
   margin: 2.4em auto;
-  padding-left: $post_padding;
   padding-left: 0;
 
   .more {
@@ -178,7 +176,7 @@ ARTICLE.post {
         color: #999;
       }
       &:hover {
-        color: #c00 !important;
+        color: $theme_color !important;
         text-decoration: underline;
       }
     }
@@ -401,7 +399,7 @@ H3.divider {
     TEXTAREA {
       min-height: 160px;
     }
-    .errored { background-color: #fee; }
+    .errored { background-color: $error_background_color; }
     TEXTAREA, INPUT[type='text'] {
       font-size: 1.1em;
       max-width: 100%;
