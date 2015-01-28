@@ -2,12 +2,12 @@
 
 A simple blogging / linklogging tool for communities. Used to run http://rubyflow.com/
 
-# Features:
+## Features:
 
 * Admin user can delete any comment or edit/delete any post
 * Optimized for running on Heroku
 
-# Dependencies
+## Dependencies
 
 You need to have these things:
 
@@ -17,9 +17,7 @@ You need to have these things:
 
 In production, use Heroku plus their Postgres service and the Redis Cloud service. You can run a simple flow2 install entirely for free this way but then have the option to scale up in future.
 
-# Development use
-
-## Setting up dependencies
+## Development / local use
 
 Setting up .env is the longest piece of the puzzle, but once it's set up, you're good. First, you need to specify your app's root URL:
 
@@ -54,7 +52,7 @@ And to finally run the app:
 
     foreman start
 
-# Deployment to production
+## Deployment to production
 
 flow2 has been optimized to deploy well on Heroku. You can deploy it elsewhere, but you'll need to figure out the details.
 
@@ -72,7 +70,7 @@ Eventually, you can just do this:
 
     git push heroku master
 
-# TODOs
+## TODOs
 
 * Make delete redirect when used from a post page, it currently works but the UI result fails
 * Have a 'moderator' role
