@@ -1,4 +1,4 @@
-<% if @page == 1 %>
+<% if @page == 1 && !@posts.empty? %>
   <h3 class='divider'><i class='fa fa-calendar-o'></i>&nbsp;&nbsp;<%= @posts.first.time %></h3>
 <% end %>
 

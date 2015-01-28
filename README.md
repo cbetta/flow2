@@ -66,6 +66,17 @@ Things to consider:
 
 * You'll need a separate OAuth setup (with key and secret) from GitHub or Twitter, etc.
 
+### The actual process
+
+    git clone git@github.com:peterc/flow2.git yourflow
+    cd yourflow
+    heroku apps:create yourflow
+    heroku addons:add heroku-postgresql:hobby-dev
+    heroku addons:add rediscloud
+    heroku config:set RACK_ENV=production
+    heroku config:set AUTH_PROVIDER=GitHub GITHUB_KEY=... GITHUB_SECRET=...
+    heroku config:set BASE_URL=http://yourflow.herokuapp.com/
+
 Eventually, you can just do this:
 
     git push heroku master
