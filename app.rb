@@ -37,6 +37,7 @@ DESCRIPTION_PAGE = Post[uid: 'description']
 module Flow
   class App < Sinatra::Base
     configure do
+      use Rack::Deflater
       use Rack::Session::Cookie,
                      :key => 'flow.session',
                      :path => '/',
