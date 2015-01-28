@@ -14,18 +14,14 @@ var loading = false;
 // Is the page visible? (That is, is the tab currently open?)
 var pageVisible = true;
 
-Store info about the visit
+// Store information about the visit
 try {
   localStorage['lastLoaded'] = new Date().getTime();
   localStorage['views'] = localStorage['views'] || 0
   localStorage['views']++
-  
-  // If the user has seen more than 5 pages on the site, they
-  // don't need to see a lot of the 'cruft'
-  if (parseInt(localStorage['visits']) < 5) {
-    $('#sitedescription').show();
-  } else {
-    $('BODY').addClass('expert');
+
+  if (localStorage['hideDescription']) {
+    $('#sitedescription').hide();
   }
 } catch(e) { }
 
@@ -48,6 +44,12 @@ function doDateBreakLines() {
 
 // When the document is loaded and good to go, do a lotta stuff!
 $(document).ready(function() {
+  // Let people close the site description permanently
+  $('#sitedescription a.close').click(function() {
+    $('#sitedescription').hide();
+    localStorage['hideDescription'] = true;
+  });
+
   // Make sure all forms save their contents
   $('.postbox FORM').sisyphus({ autoRelease: false });
 
@@ -83,7 +85,7 @@ $(document).ready(function() {
       });
     }
     e.preventDefault();
-  });  
+  });
 
   // Deleting comments
   $('section.comments').on('click', '.tools A.deletecomment', function(e) {
@@ -161,14 +163,6 @@ $(document).ready(function() {
     e.preventDefault();
     return false;
   });
-
-  // If the user hasn't seen the site's description bar before, show it
-  // if(!localStorage['seenDescription']) {
-  //   localStorage['seenDescription'] = true;
-  //   $('#sitedescription').show();
-  // }
-
-  // $('#sitedescription').show();
 
   function showSubmitForm() {
     $('#sitedescription').hide();

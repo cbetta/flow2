@@ -267,7 +267,7 @@ module Flow
         end
 
         comment.save
-        Cache.expire('post:' + comment.post.uid)      
+        Cache.expire('post:' + comment.post.uid)
 
         flash[:notice] = "Your comment has been posted - thanks!"
 

@@ -17,7 +17,7 @@ $font_size: <%= Config[:font_size] || "16px" %>;
 $line_height: <%= Config[:line_height] || "1.4em" %>;
 $bold_weight: <%= Config[:bold_weight] || "normal" %>;
 
-$top_padding: 84px;
+$top_padding: 54px;
 $inner_width: <%= Config[:inner_width] || "50em" %>;
 $avatar_size: <%= Config[:avatar_width] || "48px" %>;
 
@@ -27,8 +27,14 @@ BODY {
   line-height: $line_height;
   color: $text_color;
   background-color: $background_color;
-  margin: $top_padding 0;
+  margin: 0;
+  padding: 0;
   .admin { display: none }
+}
+
+#mainarea {
+  margin-top: $top_padding;
+  overflow: auto;
 }
 
 BODY.admin .admin {
@@ -146,8 +152,6 @@ ARTICLE.post {
     }
   }
 
-
-
   &.read {
     transition: opacity 0.3s ease-out;
     opacity: 0.5;
@@ -187,7 +191,7 @@ ARTICLE.post {
 
   .body, .comments { margin-left: $avatar_size + 16px; }
 
-  .body { 
+  .body {
     A:visited {
         color: #999;
         font-weight: 300;
@@ -222,11 +226,8 @@ SECTION.comments {
   }
 }
 
-SECTION.posts {
-  margin-top: -28px;
-}
-
 BODY.post ARTICLE.post {
+  margin-top: 24px;
   p {
     margin: 1em 0;
   }
@@ -248,7 +249,6 @@ BODY.post ARTICLE.post {
       font-size: 1.1em;
       line-height: $line_height;
     }
-
   }
   .metadata {
       font-size: 0.9em;
@@ -264,9 +264,24 @@ BODY.post ARTICLE.post {
 #sitedescription {
   text-align: center;
   margin-bottom: 8px;
+
+
   .inner {
-    display: inline-block;
-    margin-top: 0px;
+    border: 1px solid #ddd;
+    background-color: #fff;
+    position: relative;
+    margin-top: 12px;
+    margin-bottom: 0px;
+    padding-top: 16px;
+    padding-bottom: 10px;
+
+    a.close {
+      position: absolute;
+      right: 8px;
+      top: 0px;
+      font-size: 1.4em;
+      cursor: pointer;
+    }
   }
   h2 {
     margin: 0;
@@ -274,9 +289,6 @@ BODY.post ARTICLE.post {
     font-size: 2.0em;
     line-height: $line_height;
     color: #666;
-  }
-  &:before {
-    content: "";
   }
   div.description {
     font-size: 1.2em;
@@ -335,7 +347,7 @@ H3.divider {
   background-color: #eee;
   text-align: left;
   text-transform: uppercase;
-  margin-top: 24px;
+  margin-top: 12px;
   margin-left: -12px;
   margin-right: -12px;
   margin-bottom: -18px;
@@ -495,7 +507,7 @@ H3.divider {
 
 // For very small screens, sacrifices must be made
 @media screen and (max-width: 420px) {
-  HEADER.top { 
+  HEADER.top {
     .avatar { display: none }
     .menu A {
       padding: 0px 10px;
@@ -506,3 +518,5 @@ H3.divider {
 BODY.expert {
   HEADER.top .menu .optional { display: none; }
 }
+
+<%= Config[:custom_css] %>

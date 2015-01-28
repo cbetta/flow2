@@ -103,7 +103,7 @@ Then, for example:
 
     Config[:site_name] = "YourSite"
     Config[:site_description] = "A place to call your own"
-		Config[:twitter_username] = "youraccount"
+    Config[:twitter_username] = "youraccount"
     Config[:stylesheets] = "http://..."
     Config[:stylesheets] = ["http://...", "http://..."]
     Config[:cookie_key] = "yoursite.session"    
@@ -131,9 +131,21 @@ However, you'll note that certain things still don't take effect. This is becaus
 
 For some reason, `heroku run rake assets:precompile` does not do the trick, so you need to force a rebuild. Here's the technique I'm using - which involves installing a plugin:
 
-    # You only need to do this first line once
     heroku plugins:install https://github.com/heroku/heroku-repo.git
-    heroku repo:rebuild -a yourflow   # replace yourflow with your app name
+
+Then to force a rebuild of the app slug thereafter:
+
+    heroku repo:rebuild -a yourflow   # replace yourflow with your app name!
+
+
+
+## Advanced or esoteric things
+
+### Uploading a database from your local environment to Heroku
+
+    pg_dump -Fc --no-acl --no-owner localdbname > /tmp/localdbname.dump
+    scp /tmp/localdbname.dump wherever@you.want # or use S3
+    heroku pgbackups:restore DATABASE 'http://url.goes.here/localdbname.dump'
 
 ## TODOs
 
