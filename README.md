@@ -81,15 +81,63 @@ Deploying on Heroku is pretty easy.
     git push heroku master
     heroku open
 
+*Note: Be sure to replace `yourflow` with a more specific name for your own site ;-)*
+
 To get access to the console (such as to set other settings):
 
     heroku run rake console
 
-*Note: Be sure to replace `yourflow` with a more specific name for your own site ;-)*
+### Customizing your site
+
+Some customizations occur via the environment variables.
+
+If you have a 'kit' ID from Typekit you can use, for example:
+
+    TYPEKIT_ID=abcdefg
+
+But most customizations occur via a 'config' system within the app. This is currently managed through the console (although a Web interface is possible long term):
+
+    heroku run rake console
+
+Then, for example:
+
+    Config[:site_name] = "YourSite"
+    Config[:site_description] = "A place to call your own"
+		Config[:twitter_username] = "youraccount"
+    Config[:stylesheets] = "http://..."
+    Config[:stylesheets] = ["http://...", "http://..."]
+    Config[:cookie_key] = "yoursite.session"    
+    Config[:cookie_timeout] = 86400 * 365
+    Config[:theme_color] = "#099"
+    Config[:text_color] = "#222"
+    Config[:background_color] = "white"
+    Config[:header_background_color] = "#0cc"
+    Config[:fonts] = "'Open Sans', 'Helvetica Neue', arial, sans-serif"
+    Config[:header_fonts] = "Futura, Helvetica, sans-serif"
+    Config[:font_size] = "14px"
+    Config[:comment_max_length] = 1000
+    Config[:comment_allowed_elements] = %w{a em strong p}
+    Config[:username_min_length] = 3
+    Config[:username_max_length] = 20
+    Config[:inner_width] = "960px"
+    Config[:avatar_size] = "64px"
+
+
+Then:
+
+    heroku restart
+
+However, you'll note that certain things still don't take effect. This is because the assets need to be recompiled for any style related items to be used.
+
+For some reason, `heroku run rake assets:precompile` does not do the trick, so you need to force a rebuild. Here's the technique I'm using - which involves installing a plugin:
+
+    # You only need to do this first line once
+    heroku plugins:install https://github.com/heroku/heroku-repo.git
+    heroku repo:rebuild -a yourflow   # replace yourflow with your app name
 
 ## TODOs
 
 * Search
 * Have a 'moderator' role
-* A proper configuration system for customizing without touching code
 * Good caching - it's just RSS and front page for non logged in users for now
+* Work out the asset precompilation issue

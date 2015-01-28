@@ -14,18 +14,20 @@ var loading = false;
 // Is the page visible? (That is, is the tab currently open?)
 var pageVisible = true;
 
-// Store info about the visit
-// try {
-//   localStorage['lastLoaded'] = new Date().getTime();
-//   localStorage['views'] = localStorage['views'] || 0
-//   localStorage['views']++
-//   
-//   // If the user has seen more than 5 pages on the site, they
-//   // don't need to see a lot of the 'cruft'
-//   if (parseInt(localStorage['visits']) > 5) {
-//     $('BODY').addClass('expert');
-//   }
-// } catch(e) { }
+Store info about the visit
+try {
+  localStorage['lastLoaded'] = new Date().getTime();
+  localStorage['views'] = localStorage['views'] || 0
+  localStorage['views']++
+  
+  // If the user has seen more than 5 pages on the site, they
+  // don't need to see a lot of the 'cruft'
+  if (parseInt(localStorage['visits']) < 5) {
+    $('#sitedescription').show();
+  } else {
+    $('BODY').addClass('expert');
+  }
+} catch(e) { }
 
 // Puts a nice divider between posts of different dates, even if loaded dynamically
 function doDateBreakLines() {
@@ -161,10 +163,10 @@ $(document).ready(function() {
   });
 
   // If the user hasn't seen the site's description bar before, show it
-  if(!localStorage['seenDescription']) {
-    localStorage['seenDescription'] = true;
-    $('#sitedescription').show();
-  }
+  // if(!localStorage['seenDescription']) {
+  //   localStorage['seenDescription'] = true;
+  //   $('#sitedescription').show();
+  // }
 
   // $('#sitedescription').show();
 
