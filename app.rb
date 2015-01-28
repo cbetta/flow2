@@ -26,6 +26,7 @@ require_relative 'lib/sanitize_ext'
 require_relative 'concerns/content'
 require_relative 'concerns/validations'
 
+require_relative 'models/config'
 require_relative 'models/user'
 require_relative 'models/post'
 require_relative 'models/comment'
