@@ -12,6 +12,7 @@ class Sequel::Model
 	plugin :schema
 	plugin :after_initialize
 
+	# TODO: Get these into concerns
 	def errors_list
     list = []
     errors.each do |k, v|
@@ -24,7 +25,7 @@ class Sequel::Model
 
   def self.find_where_editable_by(user, conditions)
     obj = find(conditions)
-    obj && obj.can_be_edited_by?(user) ? obj : false
+    return obj if obj.can_be_edited_by?(user)
   end
 
   def can_be_edited_by?(the_user)

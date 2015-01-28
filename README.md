@@ -72,6 +72,7 @@ Eventually, you can just do this:
 
 ## TODOs
 
-* Make delete redirect when used from a post page, it currently works but the UI result fails
+* Search
 * Have a 'moderator' role
 * A proper configuration system for customizing without touching code
+* Good caching - it's just RSS and front page for non logged in users for now

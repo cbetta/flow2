@@ -14,6 +14,19 @@ var loading = false;
 // Is the page visible? (That is, is the tab currently open?)
 var pageVisible = true;
 
+// Store info about the visit
+// try {
+//   localStorage['lastLoaded'] = new Date().getTime();
+//   localStorage['views'] = localStorage['views'] || 0
+//   localStorage['views']++
+//   
+//   // If the user has seen more than 5 pages on the site, they
+//   // don't need to see a lot of the 'cruft'
+//   if (parseInt(localStorage['visits']) > 5) {
+//     $('BODY').addClass('expert');
+//   }
+// } catch(e) { }
+
 // Puts a nice divider between posts of different dates, even if loaded dynamically
 function doDateBreakLines() {
   var lastdoy = 0;
@@ -46,11 +59,29 @@ $(document).ready(function() {
         url: base_url + "/post/" + uid,
         success: function(res) {
           el.hide();
+          $.growl.notice({ message: "Post deleted" });
         }
       });
     }
     e.preventDefault();
   });
+
+  // Deleting posts from within the post itself
+  // This is getting a bit ugly, but hey ho, refactor later!
+  $('BODY.post ARTICLE.post .tools A.delete').click(function(e) {
+    var el = $(this).closest('article.post');
+    var uid = el.data('uid');
+    if (confirm('Delete this post?')) {
+      $.ajax({
+        type: "DELETE",
+        url: base_url + "/post/" + uid,
+        success: function(res) {
+          window.location = base_url;
+        }
+      });
+    }
+    e.preventDefault();
+  });  
 
   // Deleting comments
   $('section.comments').on('click', '.tools A.delete', function(e) {
@@ -219,8 +250,6 @@ $(document).ready(function() {
     //   }
     // });
 
-    // Store the time visited
-    localStorage['lastLoaded'] = new Date().getTime();
   };
 
   // TODO: Add polling for new posts
@@ -238,3 +267,4 @@ $(document).ready(function() {
     }
   });
 });
+

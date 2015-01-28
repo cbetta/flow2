@@ -5,7 +5,7 @@
   <div class="body">
     <h1><a href="<%= post.url %>"><%= post.title %></a></h1>
     <p><%= post.lead_content %> <% if post.more_inside? %><span class="more">[<a href="<%= post.url %>">more inside</a>]</span><% end %></p>
-    <div class="metadata"><% if post.author %><cite><% if post.author_link %><%= post.author_link %><% else %><i class="fa fa-user"></i><% end %> <%= post.author %></cite>&nbsp;&nbsp;<% end %><time><%= post.time %></time> <% if post.can_be_edited_by?(current_user) %><div class="tools"><a href="<%= post.url %>?edit=true" class="edit">Edit</a> <a href="#" class="delete admin">Delete</a></div><% end %></div>
+    <div class="metadata"><% if post.author %><cite><% if post.author_link %><%= post.author_link %><% else %><i class="fa fa-user"></i><% end %> <%= post.author %></cite>&nbsp;&nbsp;<% end %><time><%= post.time %></time> <% if post.can_be_edited_by?(current_user) %><div class="tools"><a href="<%= post.url %>?edit=true" class="edit">Edit</a> <a href="#" class="delete">Delete</a></div><% end %></div>
     <% if post.comments? %>
     	<% post.comments.to_a.last(4).each do |comment| %>
   			<%= erb :_inline_comment, locals: { comment: comment } %>
