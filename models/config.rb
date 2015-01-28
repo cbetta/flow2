@@ -10,11 +10,17 @@ class Config < Sequel::Model
 
   def self.[](key)
   	@cache = {} unless ENV['RACK_ENV'] == 'production'
-  	@cache[key.to_sym] ||= super(key.to_s).value
+  	if val = super(key.to_s)
+	  	@cache[key.to_sym] ||= val.value
+	  end
   end
 
   def self.[]=(key, val)
-  	obj = find(id: key.to_s)
+  	unless obj = find(id: key.to_s)
+  		obj = Config.new
+  		obj.id = key.to_s
+  	end
+
   	obj.value = val
   	obj.save
   	@cache[key.to_sym] = obj.value
