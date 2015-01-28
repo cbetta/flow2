@@ -30,7 +30,7 @@ class Post < Sequel::Model
   end
 
   many_to_one :user
-  one_to_many :comments
+  one_to_many :comments, order: :id
 
     # Are there enough posts to have a page 2, 3, 4, etc?
   def self.is_there_a_page?(page)
