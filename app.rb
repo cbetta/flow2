@@ -321,7 +321,7 @@ module Flow
           u.fullname = r['info']['name']
 
           # Do they have an image/avatar at the auth provider? If so, mirror it.
-          if r['info']['image']
+          if r['info']['image'] && S3::CLIENT
             fn = u.username.to_s + uid.to_s
             # Since it's not essential, we'll rescue this away if the upload fails
             u.avatar_url = MirrorImage.mirror_image_to_s3(r['info']['image'], fn) rescue nil
