@@ -68,7 +68,7 @@ $(document).ready(function() {
 
   // Deleting posts from within the post itself
   // This is getting a bit ugly, but hey ho, refactor later!
-  $('BODY.post ARTICLE.post .tools A.delete').click(function(e) {
+  $('BODY.post ARTICLE.post > .body .metadata .tools A.delete').click(function(e) {
     var el = $(this).closest('article.post');
     var uid = el.data('uid');
     if (confirm('Delete this post?')) {
