@@ -19,7 +19,7 @@
       <div class="menu">
         <ul>
           <% if logged_in? %>
-            <li><div class="avatar small" style="background-image: url(<%= current_user.avatar_url %>)"></div></li>
+            <li><div class="avatar small" style="background-image: url(<%= current_user.avatar %>)"></div></li>
             <li class="signout"><a href="/logout" title="Sign out"><i class="fa fa-sign-out"></i><span class="optional">Sign out</span></a></li>
           <% end %>
           <li class="rss"><a href="/rss" title="RSS feed"><i class="fa fa-rss"></i><span class="optional">RSS</span></a></li>

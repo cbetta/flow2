@@ -81,6 +81,10 @@ Deploying on Heroku is pretty easy.
     git push heroku master
     heroku open
 
+To get access to the console (such as to set other settings):
+
+    heroku run rake console
+
 *Note: Be sure to replace `yourflow` with a more specific name for your own site ;-)*
 
 ## TODOs
