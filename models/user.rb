@@ -33,7 +33,7 @@ class User < Sequel::Model(DB[:users])
 
   def gravatar_url
     return false unless self.email.to_s.length > 5
-    %{http://www.gravatar.com/avatar.php?gravatar_id=#{Digest::MD5.hexdigest(self.email)}&size=64}
+    %{http://www.gravatar.com/avatar/#{Digest::MD5.hexdigest(self.email)}?size=64}
   end
 
   def gravatar?; gravatar_url end
