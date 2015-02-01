@@ -1,7 +1,6 @@
 <%= erb :_site_description unless internal_visitor? %>
 
 <section class="inner post">
-
 <% if @post %>
 	<article class="post <%= @post.avatar? ? "withavatar" : "noavatar" %>" data-id="<%= @post.id %>" data-uid="<%= @post.uid %>" data-timestamp="<%= @post.timestamp %>" data-page="<%= @page %>">
 
@@ -31,9 +30,7 @@
   	</section>
 	</article>
 
-
 <% else %>
 	<h2>No such post</h2>
 <% end %>
-
 </section>

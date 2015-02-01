@@ -16,9 +16,9 @@ gem 'omniauth-twitter'
 gem 'omniauth-facebook'
 
 gem 'sass'
-gem 'sinatra-asset-pipeline'
-gem 'rack-flash3'
-gem 'rack_csrf'
+gem 'sinatra-asset-pipeline', require: 'sinatra/asset_pipeline'
+gem 'rack-flash3', require: 'rack-flash'
+gem 'rack_csrf', require: 'rack/csrf'
 
 gem 'kramdown'
 gem 'nokogiri'

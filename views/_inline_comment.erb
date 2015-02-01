@@ -1,4 +1,4 @@
 <div class="comment inline" data-id="<%= comment.id %>" data-timestamp="<%= comment.timestamp %>">
-    <div class="content"><i class="fa fa-comment-o"></i>  <%= comment.inline_content %></div>
-    <div class="metadata"><% if comment.author %><cite><%= comment.author %></cite><% end %></div>
+  <div class="content"><i class="fa fa-comment-o"></i>  <%= comment.inline_content %></div>
+  <div class="metadata"><% if comment.author %><cite><%=h comment.author %></cite><% end %></div>
 </div>

@@ -11,6 +11,7 @@ A simple blogging / linklogging tool for communities. Used to run http://rubyflo
 
 You need to have these things:
 
+* Ruby 2.2
 * Postgres (9.3 fine for now)
 * an account at Twitter, GitHub, or Facebook to create an 'app' for OAuth usage there
 * Redis (you *can* run without it but you'll get no rate limiting or caching)
@@ -86,6 +87,8 @@ Deploying on Heroku is pretty easy.
 To get access to the console (such as to set other settings):
 
     heroku run rake console
+
+Other rake tasks include `reset_redis` and `reset_db` - use both with caution.
 
 ### Customizing your site
 

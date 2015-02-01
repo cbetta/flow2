@@ -1,3 +1,4 @@
+<% # Show a date divider if we're on page one and have posts to show %>
 <% if @page == 1 && !@posts.empty? %>
   <h3 class='divider'><i class='fa fa-calendar-o'></i>&nbsp;&nbsp;<%= @posts.first.time %></h3>
 <% end %>
@@ -6,8 +7,7 @@
   <%= erb :_post, locals: { post: post } %>
 <% end %>
 
+<% # If there are further pages of posts, show a next page link for SEO purposes %>
 <% if Post.is_there_a_page?(@page.to_i + 1) %>
-<div class="nextpage">
-	<a href="?page=<%= @page.to_i + 1 %>">Next page &raquo;</a>
-</div>
+  <div class="nextpage"><a href="?page=<%= @page.to_i + 1 %>">Next page &raquo;</a></div>
 <% end %>

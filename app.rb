@@ -1,33 +1,12 @@
 require 'bundler/setup'
 Bundler.require
 
-require 'sass'
-require 'sinatra/base'
-require 'sinatra/asset_pipeline'
-require 'rack/csrf'
-require 'sprockets-helpers'
-require 'time'
-require 'json'
-require 'rack-flash'
-
+# Load configurations, libraries, concerns, and models
 (require('dotenv') && Dotenv.load) if development?
+Dir['{config,lib,concerns}/*.rb'].each { |f| require_relative f }
+%w{config comment post user}.each { |f| require_relative "models/#{f}" }
 
-require_relative 'config/sequel'
-require_relative 'config/redis'
-require_relative 'config/aws'
-
-require_relative 'lib/mirror_image'
-require_relative 'lib/rate_limiter'
-
-require_relative 'concerns/content'
-require_relative 'concerns/validations'
-require_relative 'concerns/errors_as_array'
-
-require_relative 'models/config'
-require_relative 'models/user'
-require_relative 'models/post'
-require_relative 'models/comment'
-
+# App-wide constants
 AUTH_PROVIDER = ENV['AUTH_PROVIDER'] || "GitHub"
 ABOUT_PAGE = Post[uid: 'about']
 DESCRIPTION_PAGE = Post[uid: 'description']
@@ -38,25 +17,25 @@ SITE_DESCRIPTION = Config[:site_description] || ENV['SITE_DESCRIPTION'] || "a li
 module Flow
   class App < Sinatra::Base
     configure do
+      # Rack middleware
       use Rack::Deflater
       use Rack::Session::Cookie,
                      :key => (Config[:cookie_key]  || 'flow.session'),
                      :path => '/',
                      :expire_after => (Config[:cookie_timeout] || 86400 * 90),
                      :secret => ENV["SECRET"] || "put something rather unique here"
-
-      register Sinatra::AssetPipeline
-      set :sprockets, Sprockets::Environment.new(root)
-      set :assets_prefix, '/assets'
-      set :digest_assets, production?
-
       use Rack::Flash
-
       use OmniAuth::Builder do
         provider(:github, ENV['OAUTH_PROVIDER_KEY'] || ENV['GITHUB_KEY'], ENV['OAUTH_PROVIDER_SECRET'] || ENV['GITHUB_SECRET'], scope: 'user:email') if AUTH_PROVIDER.to_s.downcase == 'github'
         provider(:twitter, ENV['OAUTH_PROVIDER_KEY'] || ENV['TWITTER_KEY'], ENV['OAUTH_PROVIDER_SECRET'] || ENV['TWITTER_SECRET'], scope: 'user:email') if AUTH_PROVIDER.to_s.downcase == 'twitter'
         provider(:facebook, ENV['OAUTH_PROVIDER_KEY'] || ENV['FACEBOOK_KEY'], ENV['OAUTH_PROVIDER_SECRET'] || ENV['FACEBOOK_SECRET'], scope: 'email') if AUTH_PROVIDER.to_s.downcase == 'facebook'
       end
+
+      # Asset pipeline configuration
+      register Sinatra::AssetPipeline
+      set :sprockets, Sprockets::Environment.new(root)
+      set :assets_prefix, '/assets'
+      set :digest_assets, production?
 
       sprockets.append_path File.join(root, 'assets', 'css')
       sprockets.append_path File.join(root, 'assets', 'js')
@@ -69,6 +48,7 @@ module Flow
         config.debug       = true if development?
       end
 
+      # If the New Relic plugin is installed, run it up
       require 'newrelic_rpm' if ENV['NEW_RELIC_LICENSE_KEY'] && production?
     end
 
@@ -76,16 +56,23 @@ module Flow
       include Sprockets::Helpers
       include RateLimiter
 
+      # HTML-safe rendering of text
       def h(text)
         Rack::Utils.escape_html(text)
       end
 
+      # Return the currently logged in user, if any
       def current_user
         session[:logged_in] && User[session[:logged_in]]
       end
 
       def logged_in?; current_user end
 
+      def admin?
+        logged_in? && current_user.admin?
+      end
+
+      # What page is the user attempting to view?
       def determine_page
         @offset = 0
         @page = 1
@@ -103,12 +90,9 @@ module Flow
       def with_avatar
         current_user && current_user.avatar?
       end
-
-      def admin?
-        current_user && current_user.admin?
-      end
     end
 
+    # Things to do or check before every request
     before do
       # Classes we might wish to set on the <body> tag
       @body_classes = []
@@ -141,6 +125,7 @@ module Flow
       end
     end
 
+    # The RSS feed
     get '/rss' do
       @posts = Post.recent_from_offset(@offset)
       content_type :rss
@@ -151,12 +136,16 @@ module Flow
     get '/p/:id' do
       rate_limit requests: 50, within: 40
 
+      # The unique ID is only the first part of the URL due to the presence of the slug
+      # For example /p/abcd-this-is-a-test, only "abcd" is the unique post ID
       id = params[:id].split('-').first
       @body_classes << 'post'
       @post = Post.find(uid: id)
 
+      # Trigger an edit mode flag if editing is the intention
       @editing = params[:edit] && params[:edit] == 'true'
 
+      # But don't let someone try to edit a post if they're not allowed to
       halt 403 if @editing && !@post.can_be_edited_by?(current_user)
 
       if @post
@@ -173,9 +162,11 @@ module Flow
     # You can tell I really don't give a care about REST on this project so far ;-)
     # And I really don't.
 
+    # Delete a post, if allowed to
     delete '/post/:uid' do
       post = Post.find_where_editable_by(current_user, uid: params[:uid])
       halt 404 unless post
+
       post.delete
 
       Cache.expire(:front_page)
@@ -184,9 +175,11 @@ module Flow
       erb({ success: true }.to_json, layout: false)
     end
 
+    # Delete a comment, if allowed to
     delete '/comment/:id' do
       comment = Comment.find_where_editable_by(current_user, id: params[:id])
       halt 404 unless comment
+
       comment.delete
 
       Cache.expire(:front_page)
@@ -195,7 +188,9 @@ module Flow
       erb({ success: true }.to_json, layout: false)
     end
 
+    # Create a new post
     post '/post' do
+      # If we're trying to edit an existing post, grab that post if we're allowed to
       post = Post.find_where_editable_by(current_user, uid: params[:post_uid]) if params[:post_uid]
 
       if logged_in?
@@ -239,9 +234,11 @@ module Flow
       end
     end
 
+    # Create a new comment
     post '/comment' do
       post = Post.find(uid: params[:post_id])
 
+      # If we're trying to edit an existing comment, grab it only if we're allowed to
       comment = Comment.find_where_editable_by(current_user, id: params[:comment_id]) if params[:comment_id]
 
       halt 400 unless post
@@ -371,7 +368,7 @@ module Flow
     # The external auth provider isn't liking us
     get '/auth/:provider/deauthorized' do
       # TODO: Show a nicer message than this
-      erb "#{params[:provider]} has deauthorized this app."
+      erb "<h1>#{params[:provider]} has deauthorized this app.</h1>"
     end
 
 
