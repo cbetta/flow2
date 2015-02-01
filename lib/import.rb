@@ -3,6 +3,7 @@ require 'sqlite3'
 module Flow
   # Import old flow site data from an SQLite3 database
   # Hey, somehow SQLite3 survived in production on rubyflow.com for 6 years! :-)
+  # Almost no end users will require this so don't worry about it.
   module Import
     module_function
 

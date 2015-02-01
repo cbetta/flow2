@@ -3,8 +3,8 @@
 
 	<form method="post" id="post_post" name="post_post" action="/post">
 		<% if @post %><input type="hidden" name="post_uid" value="<%= @post.uid %>" /><% end %>
-		<input type="text" placeholder="Title" name="title" class="title" size="50" maxlength="85" value="<%= @post && @post.title %>" required />
-		<textarea name="content" rows="4" cols="90" class="content" placeholder="Type your content here, including links. At the least, explain the context around your link in a single paragraph."><%= @post && @post.content %></textarea>
+		<input type="text" placeholder="Title" name="title" class="title" size="50" maxlength="85" value="<%=h @post && @post.title %>" required />
+		<textarea name="content" rows="4" cols="90" class="content" placeholder="Type your content here, including links. At the least, explain the context around your link in a single paragraph."><%=h @post && @post.content %></textarea>
 		<div class="help">You can use basic HTML markup (e.g. &lt;a&gt;) or Markdown.<br>Note that your post may be edited to suit the format of the site.</div>
 		<div class="right">
 			<% if logged_in? %><button class="preview post">Preview</button><% end %>

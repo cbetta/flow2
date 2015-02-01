@@ -11,11 +11,11 @@
 		  <div class="avatar" <% if @post.avatar? %>style="background-image: url(<%= @post.avatar_url %>)"<% end %>></div>
 	    <div class="body">
 	      <h1>
-	      	<%= @post.title %>
+	      	<%=h @post.title %>
 	      </h1>
-	    <div class="metadata"><% if @post.author %>by <cite><%= @post.author %></cite> &mdash; <% end %><time><%= @post.time %>	</time> <% if @post.can_be_edited_by?(current_user) %><div class="tools"><a href="<%= @post.url %>?edit=true" class="edit">Edit</a> <a href="#" class="deletepost">Delete</a></div><% end %></div>
+	    <div class="metadata"><% if @post.author %>by <cite><%=h @post.author %></cite> &mdash; <% end %><time><%= @post.time %>	</time> <% if @post.can_be_edited_by?(current_user) %><div class="tools"><a href="<%= @post.url %>?edit=true" class="edit">Edit</a> <a href="#" class="deletepost">Delete</a></div><% end %></div>
 	      <div class="content"><%= @post.rendered_content %></div>
-	      
+
 	    </div>
 	   <% end %>
   	<section class="comments">
@@ -33,7 +33,7 @@
 
 
 <% else %>
-	<h2>No such post</h2>	
+	<h2>No such post</h2>
 <% end %>
 
 </section>

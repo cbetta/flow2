@@ -10,7 +10,7 @@
   <%= Rack::Csrf.metatag(env) %>
   <link rel="alternate" type="application/rss+xml" title="Feed" href="<%= ENV['BASE_URL'] %>/rss">
   <% if ENV['TYPEKIT_ID'] %><script src="//use.typekit.net/<%= ENV['TYPEKIT_ID'] %>.js"></script><script>try{Typekit.load();}catch(e){}</script><% end %>
-  <% if STYLESHEETS %><% [*STYLESHEETS].each do |sheet| %><link rel="stylesheet" href="<%= sheet %>" type="text/css">
+  <% if EXTRA_STYLESHEETS %><% [*EXTRA_STYLESHEETS].each do |sheet| %><link rel="stylesheet" href="<%= sheet %>" type="text/css">
   <% end %><% end %>
 </head>
 <body class="<%= @body_classes.join(' ') %> <%= 'oauth-successful' if flash[:oauth_successful] %> <%= 'admin' if admin? %>">

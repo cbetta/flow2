@@ -54,6 +54,8 @@ GEM
     omniauth (1.2.2)
       hashie (>= 1.2, < 4)
       rack (~> 1.0)
+    omniauth-facebook (2.0.0)
+      omniauth-oauth2 (~> 1.2)
     omniauth-github (1.1.2)
       omniauth (~> 1.0)
       omniauth-oauth2 (~> 1.1)
@@ -129,6 +131,7 @@ DEPENDENCIES
   newrelic_rpm
   nokogiri
   omniauth
+  omniauth-facebook
   omniauth-github
   omniauth-twitter
   pg

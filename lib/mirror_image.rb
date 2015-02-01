@@ -14,6 +14,7 @@ module MirrorImage
   def mirror_image_to_s3(url, name)
   	return false unless S3::CLIENT
     return false unless type = FastImage.type(url)
+    return false unless CONTENT_TYPES[type.to_sym]
 
     obj = S3::BUCKET.objects.create("#{name}.#{type}", OpenURI.open_uri(url), acl: :public_read, content_type: CONTENT_TYPES[type.to_sym])
 

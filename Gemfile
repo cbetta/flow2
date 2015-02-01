@@ -13,6 +13,7 @@ gem 'redis'
 gem 'omniauth'
 gem 'omniauth-github'
 gem 'omniauth-twitter'
+gem 'omniauth-facebook'
 
 gem 'sass'
 gem 'sinatra-asset-pipeline'

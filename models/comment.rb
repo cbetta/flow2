@@ -1,10 +1,12 @@
 class Comment < Sequel::Model
   include Concerns::Content
   include Concerns::Validations
+  include Concerns::ErrorsAsArray
 
   CONTENT_LENGTH_RANGE = 5..(Config[:comment_max_length] || 8192)
   INLINE_MAX_LENGTH = Config[:comment_inline_max_length] || 80
   ALLOWED_ELEMENTS = Config[:comment_allowed_elements] || %w{a em strong b br li ul ol p code tt samp pre img}
+  ALLOWED_ATTRIBUTES = { 'a' => %w{href title} }
 
   set_schema do
     primary_key :id
@@ -30,23 +32,6 @@ class Comment < Sequel::Model
     content = Sanitize.fragment(rendered_content)[0,INLINE_MAX_LENGTH]
     content += "&hellip;" if rendered_content.length > INLINE_MAX_LENGTH
     content
-  end
-
-  # The comment's content rendered from Markdown through to HTML and sanitized
-  def rendered_content
-    content = self.content
-
-    # Expand links on their own to being links in Markdown (by surrounding with <>)
-    content.gsub!(/(^|\s)(https?\:\/\/[^\s\>]*)($|\s)/, '\1<\2>\3')
-
-    # Render any Markdown and then sanitize the HTML output
-    content = Kramdown::Document.new(content).to_html
-    cleaned = Sanitize.fragment(content, elements: ALLOWED_ELEMENTS, attributes: { 'a' => %w{href title} })
-
-    # Change links to have rel='nofollow' (to help with spam) if it's from a non-approved user
-    cleaned = Sanitize.nofollow_links(cleaned) if !self.user || (!self.user.approved && !self.user.admin?)
-
-    cleaned
   end
 
   def validate

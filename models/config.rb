@@ -6,6 +6,7 @@ class Config < Sequel::Model
 
   create_table unless table_exists?
 
+  # Using a local hash as a naive cache to keep things lean
   @cache = {}
 
   def self.[](key)

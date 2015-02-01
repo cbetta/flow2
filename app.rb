@@ -10,10 +10,7 @@ require 'time'
 require 'json'
 require 'rack-flash'
 
-if development?
-  require 'dotenv'
-  Dotenv.load
-end
+(require('dotenv') && Dotenv.load) if development?
 
 require_relative 'config/sequel'
 require_relative 'config/redis'
@@ -21,10 +18,10 @@ require_relative 'config/aws'
 
 require_relative 'lib/mirror_image'
 require_relative 'lib/rate_limiter'
-require_relative 'lib/sanitize_ext'
 
 require_relative 'concerns/content'
 require_relative 'concerns/validations'
+require_relative 'concerns/errors_as_array'
 
 require_relative 'models/config'
 require_relative 'models/user'
@@ -34,9 +31,7 @@ require_relative 'models/comment'
 AUTH_PROVIDER = ENV['AUTH_PROVIDER'] || "GitHub"
 ABOUT_PAGE = Post[uid: 'about']
 DESCRIPTION_PAGE = Post[uid: 'description']
-
-STYLESHEETS = Config[:stylesheets]
-
+EXTRA_STYLESHEETS = Config[:stylesheets]
 SITE_NAME = Config[:site_name] || ENV['SITE_NAME'] || "flow2"
 SITE_DESCRIPTION = Config[:site_description] || ENV['SITE_DESCRIPTION'] || "a linkflow site"
 
@@ -58,8 +53,9 @@ module Flow
       use Rack::Flash
 
       use OmniAuth::Builder do
-        provider(:github, ENV['GITHUB_KEY'], ENV['GITHUB_SECRET'], scope: 'user:email') if AUTH_PROVIDER.downcase == 'github'
-        provider(:twitter, ENV['TWITTER_KEY'], ENV['TWITTER_SECRET'], scope: 'user:email') if AUTH_PROVIDER.downcase == 'twitter'
+        provider(:github, ENV['OAUTH_PROVIDER_KEY'] || ENV['GITHUB_KEY'], ENV['OAUTH_PROVIDER_SECRET'] || ENV['GITHUB_SECRET'], scope: 'user:email') if AUTH_PROVIDER.to_s.downcase == 'github'
+        provider(:twitter, ENV['OAUTH_PROVIDER_KEY'] || ENV['TWITTER_KEY'], ENV['OAUTH_PROVIDER_SECRET'] || ENV['TWITTER_SECRET'], scope: 'user:email') if AUTH_PROVIDER.to_s.downcase == 'twitter'
+        provider(:facebook, ENV['OAUTH_PROVIDER_KEY'] || ENV['FACEBOOK_KEY'], ENV['OAUTH_PROVIDER_SECRET'] || ENV['FACEBOOK_SECRET'], scope: 'email') if AUTH_PROVIDER.to_s.downcase == 'facebook'
       end
 
       sprockets.append_path File.join(root, 'assets', 'css')
@@ -132,7 +128,7 @@ module Flow
     get '/' do
       redirect '/rss', 301 if params[:format].to_s == 'rss'    # Compatibility with older flow sites
 
-      rate_limit requests: 30, within: 40
+      rate_limit requests: 50, within: 40
 
       @body_classes << 'index'
       determine_page
@@ -153,7 +149,7 @@ module Flow
 
     # Show an individual post's page
     get '/p/:id' do
-      rate_limit requests: 30, within: 40
+      rate_limit requests: 50, within: 40
 
       id = params[:id].split('-').first
       @body_classes << 'post'

@@ -1,7 +1,9 @@
 require 'digest/md5'
 require 'uri'
 
-class User < Sequel::Model(DB[:users])
+class User < Sequel::Model
+  include Concerns::ErrorsAsArray
+
   USERNAME_LENGTH_RANGE = (Config[:username_min_length] || 1)..(Config[:username_max_length] || 32)
   EMAIL_LENGTH_RANGE = 6..100
 
@@ -70,6 +72,12 @@ class User < Sequel::Model(DB[:users])
   # Make the user an admin - to be used from the console for now
   def admin!
     metadata['admin'] = true
+    save
+  end
+
+  # Make the user not an admin
+  def unadmin!
+    metadata['admin'] = false
     save
   end
 end

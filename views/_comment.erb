@@ -4,6 +4,6 @@
   <% end %>
   <div class="body">
     <div class="content"><%= comment.rendered_content %></div>
-    <div class="metadata"><% if comment.author %><cite><%= comment.author %></cite> &mdash; <% end %><time><%= comment.time %></time> <% if comment.can_be_edited_by?(current_user) %><div class="tools"><a href="#" class="deletecomment admin">Delete</a></div><% end %></div>
+    <div class="metadata"><% if comment.author %><cite><%=h comment.author %></cite> &mdash; <% end %><time><%= comment.time %></time> <% if comment.can_be_edited_by?(current_user) %><div class="tools"><a href="#" class="deletecomment admin">Delete</a></div><% end %></div>
   </div>
 </div>

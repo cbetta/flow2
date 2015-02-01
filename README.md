@@ -12,7 +12,7 @@ A simple blogging / linklogging tool for communities. Used to run http://rubyflo
 You need to have these things:
 
 * Postgres (9.3 fine for now)
-* an account at Twitter or GitHub to create an 'app' for OAuth usage there
+* an account at Twitter, GitHub, or Facebook to create an 'app' for OAuth usage there
 * Redis (you *can* run without it but you'll get no rate limiting or caching)
 
 In production, use Heroku plus their Postgres service and the Redis Cloud service. You can run a simple flow2 install entirely for free this way but then have the option to scale up in future.
@@ -42,10 +42,10 @@ You would also do well to have an S3 bucket set up (for user avatars). It's not 
     AWS_SECRET=... etc.
     AWS_BUCKET=your-bucket-name-here
 
-You'll also need to create an 'application' for OAuth / authentication purposes over at either GitHub or Twitter (for now) then enter the keys into .env like so:
+You'll also need to create an 'application' for OAuth / authentication purposes over at either GitHub, Twitter or Facebook (for now) then enter the keys into .env like so:
 
-    GITHUB_KEY=...
-    GITHUB_SECRET=...
+    OAUTH_PROVIDER_KEY=...
+    OAUTH_PROVIDER_SECRET=...
     AUTH_PROVIDER=GitHub
 
 And to finally run the app:
@@ -64,11 +64,11 @@ Things to consider:
 
 * Use the Redis Cloud add on and you'll get a 25MB Redis instance for free! It'll auto-populate the `REDISCLOUD_URL` variable too, which this apps detects automatically.
 
-* You'll need a separate OAuth setup (with key and secret) from GitHub or Twitter, etc.
+* You'll need a separate OAuth setup (with key and secret) from GitHub, Twitter or Facebook, etc.
 
 ### The actual process
 
-Deploying on Heroku is pretty easy. 
+Deploying on Heroku is pretty easy.
 
     git clone git@github.com:peterc/flow2.git yourflow
     cd yourflow
@@ -76,7 +76,7 @@ Deploying on Heroku is pretty easy.
     heroku addons:add heroku-postgresql:hobby-dev
     heroku addons:add rediscloud
     heroku config:set RACK_ENV=production
-    heroku config:set AUTH_PROVIDER=GitHub GITHUB_KEY=... GITHUB_SECRET=...
+    heroku config:set AUTH_PROVIDER=GitHub OAUTH_PROVIDER_KEY=... OAUTH_PROVIDER_SECRET=...
     heroku config:set BASE_URL=http://yourflow.herokuapp.com/
     git push heroku master
     heroku open
@@ -106,7 +106,7 @@ Then, for example:
     Config[:twitter_username] = "youraccount"
     Config[:stylesheets] = "http://..."
     Config[:stylesheets] = ["http://...", "http://..."]
-    Config[:cookie_key] = "yoursite.session"    
+    Config[:cookie_key] = "yoursite.session"
     Config[:cookie_timeout] = 86400 * 365
     Config[:theme_color] = "#099"
     Config[:text_color] = "#222"
@@ -146,6 +146,11 @@ Then to force a rebuild of the app slug thereafter:
     pg_dump -Fc --no-acl --no-owner localdbname > /tmp/localdbname.dump
     scp /tmp/localdbname.dump wherever@you.want # or use S3
     heroku pgbackups:restore DATABASE 'http://url.goes.here/localdbname.dump'
+
+## FAQs
+
+**Why is it built in Sinatra/not using Rails/written in such a weird way?** Because first and foremost, it's software for me, and I wanted to have fun building it. I develop in quite an idiosyncratic way as I don't develop software professionally, work in a team, and I just do what I want, the way I want. Nonetheless, I have tried to ensure the *result* is of a high quality as that's all I care about.
+
 
 ## TODOs
 

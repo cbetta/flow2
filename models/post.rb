@@ -1,6 +1,7 @@
 class Post < Sequel::Model
   include Concerns::Content
   include Concerns::Validations
+  include Concerns::ErrorsAsArray
 
   CONTENT_LENGTH_RANGE = 10..(Config[:post_max_length] || 10000)
   TITLE_LENGTH_RANGE = 6..(Config[:post_title_max_length] || 100)
@@ -44,21 +45,6 @@ class Post < Sequel::Model
     where(visible: true).reverse_order(:id).limit(POSTS_PER_PAGE).offset(offset)
   end
 
-  # Generate a unique ID (used instead of a number in URLs)
-  def self.generate_unique_id(length = UID_LENGTH)
-    max = 36 ** length - 1        # e.g. "zzzzzz" in base 36
-    min = 36 ** (length - 1)      # e.g. "100000" in base 36
-
-    20.times do
-      # Generates a random number that when converted to base 36 will be between "100000" and "zzzzzz"
-      uid = (SecureRandom.random_number(max - min) + min).to_s(36)
-
-      # Returns the new ID if no other post has it
-      return uid unless find(uid: uid)
-    end
-  end
-
-
   # Make sure every post has a unique ID (used in URLs)
   def after_initialize
     super
@@ -83,43 +69,21 @@ class Post < Sequel::Model
     end
   end
 
+  def more_inside?
+    content_parts.length > 1
+  end
+
   # The first paragraph or 'chunk' of the body, as suitable for a front page or abbreviated feed
   def lead_content
     content = content_parts.first.to_s
 
     # Tighter restrictions on front page excerpts than elsewhere
-    content = Sanitize.fragment(content, elements: LEAD_ALLOWED_ELEMENTS, attributes: ALLOWED_ATTRIBUTES)
-
-    # Change links to have rel='nofollow' (to help with spam) if it's from a non-approved user
-    content = Sanitize.nofollow_links(content) if !self.user || (!self.user.approved && !self.user.admin?)
-      
-    content
-  end
-
-  def more_inside?
-    content_parts.length > 1
+    Sanitize.fragment(content, elements: LEAD_ALLOWED_ELEMENTS, attributes: ALLOWED_ATTRIBUTES)
   end
 
   # A description for meta tag use
   def description
     Sanitize.fragment(lead_content).gsub(/[^A-Za-z0-9 '-.,?_+"]/, '').gsub(/\s+/, ' ').strip
-  end
-
-  # The post's content rendered from Markdown through to HTML and sanitized
-  def rendered_content
-    return '' unless self.content
-    content = self.content
-
-    # Expand links on their own to being links in Markdown (by surrounding with <>)
-    content.gsub!(/(^|\s)(https?\:\/\/[^\s\>]*)($|\s)/, '\1<\2>\3')
-
-    content = Kramdown::Document.new(content).to_html
-    cleaned = Sanitize.fragment(content, elements: ALLOWED_ELEMENTS, attributes: ALLOWED_ATTRIBUTES)
-
-    # Change links to have rel='nofollow' (to help with spam) if it's from a non-approved user
-    cleaned = Sanitize.nofollow_links(cleaned) if !self.user || (!self.user.approved && !self.user.admin?)
-
-    cleaned
   end
 
   # Does this post have any comments on it?
