@@ -14,6 +14,7 @@ DB.run("CREATE EXTENSION unaccent") rescue nil
 # Uncomment this if you want to see every database query logged
 # DB.loggers << Logger.new(STDOUT) if development?
 
+# Enable schema and after_initialize callback plugins on all models in this app
 class Sequel::Model
 	plugin :schema
 	plugin :after_initialize

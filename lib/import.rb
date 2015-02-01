@@ -118,7 +118,6 @@ module Flow
         rescue
           puts "Skipping comment #{row['id']} due to errors"
         end
-
       end
     end
   end

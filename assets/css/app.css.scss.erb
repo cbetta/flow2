@@ -123,14 +123,6 @@ HEADER.top {
   border: 0px solid transparent;
   margin-bottom: 8px;
   background-size: cover;
-  //-webkit-filter: grayscale(50%) opacity(0.5);
-  &.approved {
-    //-webkit-filter: none;
-    //border: 2px solid #c66;
-    //margin-left: -2px;
-    //margin-top: -2px;
-    //box-shadow: 0px 0px 8px #ff0;
-  }
   &.small {
     width: 22px;
     height: 22px;
@@ -193,8 +185,8 @@ ARTICLE.post {
 
   .body {
     A:visited {
-        color: #999;
-        font-weight: 300;
+      color: #999;
+      font-weight: 300;
     }
   }
 
@@ -265,7 +257,6 @@ BODY.post ARTICLE.post {
   text-align: center;
   margin-bottom: 8px;
 
-
   .inner {
     border: 1px solid #ddd;
     background-color: #fff;
@@ -309,7 +300,6 @@ BODY.post ARTICLE.post {
     background-color: #eee;
     padding-top: 1em;
     padding-bottom: 1em;
-    //border-radius: 10px;
     border: 1px solid #ccc;
     padding-left: 1.2em;
     padding-right: 1.2em;
@@ -359,6 +349,7 @@ H3.divider {
   }
 }
 
+// TODO: Customize these colors based on the theme colors
 @-moz-keyframes pulsing {
   from { background-color: #c00; }
   50% { background-color: #f60; }
