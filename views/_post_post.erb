@@ -1,7 +1,7 @@
 <div id="postpost" class="postbox <%= 'noavatar' if !with_avatar %>">
 	<div class="avatar" <% if with_avatar %>style="background-image: url(<%= @post && @post.user ? @post.user.avatar_url : current_user.avatar_url %>)"<% end %>></div>
 
-	<form method="post" id="post_post" name="post_post" action="/post">
+	<form method="post" id="post_post_<%= @post.uid %>" name="post_post" action="/post">
 		<% if @post %><input type="hidden" name="post_uid" value="<%= @post.uid %>" /><% end %>
 		<input type="text" placeholder="Title" name="title" class="title" size="50" maxlength="85" value="<%=h @post && @post.title %>" required />
 		<textarea name="content" rows="4" cols="90" class="content" placeholder="Type your content here, including links. At the least, explain the context around your link in a single paragraph."><%=h @post && @post.content %></textarea>
