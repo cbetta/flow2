@@ -43,12 +43,12 @@ module Flow
         provider(:facebook, ENV['OAUTH_PROVIDER_KEY'] || ENV['FACEBOOK_KEY'], ENV['OAUTH_PROVIDER_SECRET'] || ENV['FACEBOOK_SECRET'], scope: 'email') if AUTH_PROVIDER.to_s.downcase == 'facebook'
       end
 
-      #if test?
-      require 'rack_session_access'
-require 'rack_session_access/middleware'
-require 'rack_session_access/capybara'
+      if test?
+        require 'rack_session_access'
+        require 'rack_session_access/middleware'
+        require 'rack_session_access/capybara'
         use RackSessionAccess::Middleware #, key: 'flow.session'
-      #end
+      end
 
       # Asset pipeline configuration
       register Sinatra::AssetPipeline
