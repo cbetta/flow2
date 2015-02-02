@@ -8,8 +8,15 @@ if development?
   Dotenv.load
 end
 
-Dir['{config,lib,concerns}/*.rb'].each { |f| require_relative f }
-%w{config user post comment}.each { |f| require_relative "models/#{f}" }
+Dir['{config,concerns}/*.rb'].each { |f| require_relative f }
+
+require_relative "lib/mirror_image"
+require_relative "lib/rate_limiter"
+
+require_relative "models/config"
+require_relative "models/user"
+require_relative "models/post"
+require_relative "models/comment"
 
 # App-wide constants
 AUTH_PROVIDER = ENV['AUTH_PROVIDER'] || "GitHub"
@@ -35,7 +42,7 @@ module Flow
         provider(:twitter, ENV['OAUTH_PROVIDER_KEY'] || ENV['TWITTER_KEY'], ENV['OAUTH_PROVIDER_SECRET'] || ENV['TWITTER_SECRET'], scope: 'user:email') if AUTH_PROVIDER.to_s.downcase == 'twitter'
         provider(:facebook, ENV['OAUTH_PROVIDER_KEY'] || ENV['FACEBOOK_KEY'], ENV['OAUTH_PROVIDER_SECRET'] || ENV['FACEBOOK_SECRET'], scope: 'email') if AUTH_PROVIDER.to_s.downcase == 'facebook'
       end
-      
+
       #if test?
       require 'rack_session_access'
 require 'rack_session_access/middleware'
