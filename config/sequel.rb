@@ -5,7 +5,10 @@ Sequel.extension(:pg_hstore, :pg_hstore_ops, :pg_array)
 DB.disconnect if defined?(DB)
 
 # Connect to the database
-DB = Sequel.connect(ENV['DATABASE_URL'])
+database_url = ENV[settings.environment.to_s.upcase + '_DATABASE_URL'] || ENV['DATABASE_URL']
+DB = Sequel.connect(database_url, max_connections: 2)
+DB.extension(:connection_validator)
+DB.pool.connection_validation_timeout = 30
 
 # Try to create two extensions we want to use, but skip if they raise errors
 DB.run("CREATE EXTENSION hstore") rescue nil

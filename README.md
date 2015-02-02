@@ -154,6 +154,7 @@ Then to force a rebuild of the app slug thereafter:
 
 **Why is it built in Sinatra/not using Rails/written in such a weird way?** Because first and foremost, it's software for me, and I wanted to have fun building it. I develop in quite an idiosyncratic way as I don't develop software professionally, work in a team, and I just do what I want, the way I want. Nonetheless, I have tried to ensure the *result* is of a high quality as that's all I care about.
 
+**How does the testing work?** The testing is primary acceptance based and uses `capybara-webkit`. You'll need to ensure you have Qt running for this to work - `brew install qt` may help here on OS X.
 
 ## TODOs
 

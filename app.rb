@@ -1,10 +1,15 @@
 require 'bundler/setup'
+Bundler.setup
 Bundler.require
 
 # Load configurations, libraries, concerns, and models
-(require('dotenv') && Dotenv.load) if development?
+if development?
+  require 'dotenv'
+  Dotenv.load
+end
+
 Dir['{config,lib,concerns}/*.rb'].each { |f| require_relative f }
-%w{config comment post user}.each { |f| require_relative "models/#{f}" }
+%w{config user post comment}.each { |f| require_relative "models/#{f}" }
 
 # App-wide constants
 AUTH_PROVIDER = ENV['AUTH_PROVIDER'] || "GitHub"
@@ -30,6 +35,13 @@ module Flow
         provider(:twitter, ENV['OAUTH_PROVIDER_KEY'] || ENV['TWITTER_KEY'], ENV['OAUTH_PROVIDER_SECRET'] || ENV['TWITTER_SECRET'], scope: 'user:email') if AUTH_PROVIDER.to_s.downcase == 'twitter'
         provider(:facebook, ENV['OAUTH_PROVIDER_KEY'] || ENV['FACEBOOK_KEY'], ENV['OAUTH_PROVIDER_SECRET'] || ENV['FACEBOOK_SECRET'], scope: 'email') if AUTH_PROVIDER.to_s.downcase == 'facebook'
       end
+      
+      #if test?
+      require 'rack_session_access'
+require 'rack_session_access/middleware'
+require 'rack_session_access/capybara'
+        use RackSessionAccess::Middleware #, key: 'flow.session'
+      #end
 
       # Asset pipeline configuration
       register Sinatra::AssetPipeline

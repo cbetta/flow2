@@ -1,4 +1,5 @@
 require 'sinatra/asset_pipeline/task'
+require 'rake/testtask'
 require './app'
 
 Sinatra::AssetPipeline::Task.define! Flow::App
@@ -32,4 +33,9 @@ task :reset_db do
 	STDIN.gets
 	%w{users posts comments}.each { |model| DB.run("DROP TABLE #{model} CASCADE") }
 	puts "Tables dropped"
+end
+
+desc "Run tests"
+Rake::TestTask.new do |t|
+  t.pattern = "test/*_test.rb"
 end

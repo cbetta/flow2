@@ -34,6 +34,16 @@ end
 
 group :development do
   gem 'dotenv'
-  gem 'rack-test'
   gem 'sqlite3'  # for doing data imports
+end
+
+group :test do
+  gem 'rack-test'
+  gem 'minitest'
+  gem 'capybara'
+  #gem 'capybara-webkit'
+  gem 'minitest-capybara'
+  gem 'rack_session_access'
+  gem 'database_cleaner'
+  gem 'launchy'
 end
