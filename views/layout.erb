@@ -49,6 +49,11 @@
 
   <script>
     var base_url = "<%= ENV['BASE_URL'] %>";
+    var ads = [];
+
+    <% Config['ads'].each do |ad| %>
+    ads.push(<%= ad.to_json %>);
+    <% end %>
   </script>
   <%= javascript_tag 'app' %>
   <script>

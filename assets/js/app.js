@@ -28,10 +28,31 @@ try {
 // Puts a nice divider between posts of different dates, even if loaded dynamically
 function doDateBreakLines() {
   var lastdoy = 0;
+  var adCount = 0;
   $('section.posts article.post').each(function(i) {
     var thisdoy = $(this).data('doy');
+    var doAd = false;
     if (thisdoy != lastdoy) {
+      if ((lastdoy != 0) && (ads && ads.length > 0)) {
+        doAd = true;
+      }
       lastdoy = thisdoy;
+      if (doAd && !$(this).data('ad') && adCount < 3) {
+        $(this).data('ad', true);
+        var whichAd = Math.floor(Math.random() * ads.length);
+        
+        var adHTML = "<div class='adbar' style='" + ads[whichAd]['style'] + "'>";
+        if (ads[whichAd]['button']) {
+          adHTML += "<div class='button'><a href='" + ads[whichAd]['url'] + "'>" + ads[whichAd]['button'] + "</a></div>";
+        }
+        adHTML += "<div class='text'>" + ads[whichAd]['text'] + "</div>";
+        adHTML += "</div>";
+
+        $(this).before(adHTML);
+      }      
+      if ($(this).data('ad')) {
+        adCount++;
+      }
       if (!$(this).data('dateline')) {
         $(this).data('dateline', true);
         var timeEl = $(this).find('time').first();
@@ -133,7 +154,6 @@ $(document).ready(function() {
                  $('#preview .content').html(res['preview']['content']);
                  return;
                }
-               console.log('x');
 
                // If there were errors, show them
                if (res['errors']) {

@@ -16,6 +16,14 @@ class Config < Sequel::Model
   	@cache[key.to_sym] = super(key.to_s) && super(key.to_s).typed_value
   end
 
+  def self.keys
+    all.map(&:id)
+  end
+
+  def self.to_h
+    all.map { |c| [c.id, Config[c.id]] }.to_h
+  end
+
   def self.[]=(key, val)
   	unless obj = find(id: key.to_s)
   		obj = Config.new
