@@ -119,6 +119,13 @@ class Post < Sequel::Model
       errors.add(:content, 'Your post contains no links')
     end
 
+    BLACKLIST.each do |blacklisted|
+      if self.rendered_content.downcase.include?(blacklisted)
+        errors.add(:content, 'Your post contained blacklisted content')
+        break
+      end
+    end
+
     presence_of :title
     length_of :title, in: TITLE_LENGTH_RANGE
   end

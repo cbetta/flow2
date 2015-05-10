@@ -37,6 +37,13 @@ class Comment < Sequel::Model
   def validate
     super
 
+    BLACKLIST.each do |blacklisted|
+      if self.rendered_content.downcase.include?(blacklisted)
+        errors.add(:content, 'Your post contained blacklisted content')
+        break
+      end
+    end
+
     presence_of :content
     length_of :content, in: CONTENT_LENGTH_RANGE
   end

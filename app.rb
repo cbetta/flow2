@@ -25,6 +25,7 @@ DESCRIPTION_PAGE = Post[uid: 'description']
 EXTRA_STYLESHEETS = Config[:stylesheets]
 SITE_NAME = Config[:site_name] || ENV['SITE_NAME'] || "flow2"
 SITE_DESCRIPTION = Config[:site_description] || ENV['SITE_DESCRIPTION'] || "a linkflow site"
+BLACKLIST = File.readlines(File.join(__dir__, 'config', 'blacklist.txt')).select { |l| l =~ /^\w+/ }.map { |l| l.strip }
 
 module Flow
   class App < Sinatra::Base

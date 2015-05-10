@@ -1,0 +1,7 @@
+# In this file, include words that automatically blacklist a post or comment
+
+chanel
+prada
+louis vuitton
+wallets
+handbag
