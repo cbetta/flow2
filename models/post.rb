@@ -121,7 +121,7 @@ class Post < Sequel::Model
 
     BLACKLIST.each do |blacklisted|
       if self.rendered_content.downcase.include?(blacklisted)
-        errors.add(:content, 'Your post contained blacklisted content')
+        errors.add(:content, 'Your post contains blacklisted / spam content')
         break
       end
     end
