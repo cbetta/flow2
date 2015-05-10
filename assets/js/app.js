@@ -43,9 +43,9 @@ function doDateBreakLines() {
         
         var adHTML = "<div class='adbar' style='" + ads[whichAd]['style'] + "'>";
         if (ads[whichAd]['button']) {
-          adHTML += "<div class='button'><a href='" + ads[whichAd]['url'] + "'>" + ads[whichAd]['button'] + "</a></div>";
+          adHTML += "<div class='button' style='" + ads[whichAd]['buttonStyle'] + "'><a href='" + ads[whichAd]['url'] + "' style='" + ads[whichAd]['linkStyle'] + "'>" + ads[whichAd]['button'] + "</a></div>";
         }
-        adHTML += "<div class='text'>" + ads[whichAd]['text'] + "</div>";
+        adHTML += "<div class='text' style='" + ads[whichAd]['textStyle'] + "'>" + ads[whichAd]['text'] + "</div>";
         adHTML += "</div>";
 
         $(this).before(adHTML);
