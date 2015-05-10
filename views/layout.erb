@@ -51,7 +51,7 @@
     var base_url = "<%= ENV['BASE_URL'] %>";
     var ads = [];
 
-    <% Config['ads'].to_a.each do |ad| %>
+    <% Config['ads'].to_a.shuffle.each do |ad| %>
     ads.push(<%= ad.to_json %>);
     <% end %>
   </script>

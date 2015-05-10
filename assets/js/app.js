@@ -39,17 +39,17 @@ function doDateBreakLines() {
       lastdoy = thisdoy;
       if (doAd && !$(this).data('ad') && adCount < 3) {
         $(this).data('ad', true);
-        var whichAd = Math.floor(Math.random() * ads.length);
-        
-        var adHTML = "<div class='adbar' style='" + ads[whichAd]['style'] + "'>";
-        if (ads[whichAd]['button']) {
-          adHTML += "<div class='button' style='" + ads[whichAd]['buttonStyle'] + "'><a href='" + ads[whichAd]['url'] + "' style='" + ads[whichAd]['linkStyle'] + "'>" + ads[whichAd]['button'] + "</a></div>";
+        var ad = ads.pop();
+
+        var adHTML = "<div class='adbar' style='" + ad['style'] + "'>";
+        if (ad['button']) {
+          adHTML += "<div class='button' style='" + ad['buttonStyle'] + "'><a href='" + ad['url'] + "' style='" + ad['linkStyle'] + "'>" + ad['button'] + "</a></div>";
         }
-        adHTML += "<div class='text' style='" + ads[whichAd]['textStyle'] + "'>" + ads[whichAd]['text'] + "</div>";
+        adHTML += "<div class='text' style='" + ad['textStyle'] + "'>" + ad['text'] + "</div>";
         adHTML += "</div>";
 
         $(this).before(adHTML);
-      }      
+      }
       if ($(this).data('ad')) {
         adCount++;
       }
