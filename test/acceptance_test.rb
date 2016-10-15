@@ -3,7 +3,7 @@ require_relative 'test_helper'
 describe Flow::App do
   it "has a working front page" do
     visit '/'
-    page.must_have_content "TestFlow"
+    page.must_have_content SITE_NAME
   end
 
   it "has a working front page for a logged in user" do
