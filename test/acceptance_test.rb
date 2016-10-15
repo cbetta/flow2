@@ -10,7 +10,6 @@ describe Flow::App do
     user = User.create username: 'test', email: 'test@example.com', fullname: 'Test Test'
     page.set_rack_session logged_in: user.id
     page.visit '/'
-    save_and_open_page
     page.get_rack_session_key('logged_in').must_equal user.id
     p page.get_rack_session
   end

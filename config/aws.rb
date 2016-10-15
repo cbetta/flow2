@@ -4,8 +4,7 @@ module S3
   CLIENT = if ENV['AWS_KEY'] && ENV['AWS_BUCKET']
     require 'aws-sdk'
     puts "Connecting to Amazon S3"
-    AWS.config access_key_id: ENV['AWS_KEY'], secret_access_key: ENV['AWS_SECRET']
-    AWS::S3.new
+    Aws::S3::Client.new
   end
 
   # And if we end up with a client..

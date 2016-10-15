@@ -11,7 +11,7 @@ A simple blogging / linklogging tool for communities. Used to run http://rubyflo
 
 You need to have these things:
 
-* Ruby 2.2
+* Ruby 2.3
 * Postgres (9.3 fine for now)
 * an account at Twitter, GitHub, or Facebook to create an 'app' for OAuth usage there
 * Redis (you *can* run without it but you'll get no rate limiting or caching)
@@ -39,8 +39,8 @@ If your Redis instance is on localhost at the default port, you don't need to do
 
 You would also do well to have an S3 bucket set up (for user avatars). It's not a strict requirement though. If you do set it up, you'll need these entries in .env:
 
-    AWS_KEY=... etc.
-    AWS_SECRET=... etc.
+    AWS_ACCESS_KEY_ID=... etc.
+    AWS_SECRET_ACCESS_KEY=... etc.
     AWS_BUCKET=your-bucket-name-here
 
 You'll also need to create an 'application' for OAuth / authentication purposes over at either GitHub, Twitter or Facebook (for now) then enter the keys into .env like so:

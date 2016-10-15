@@ -1,9 +1,9 @@
-source "http://rubygems.org/"
-ruby "2.2.0"
+source 'http://rubygems.org/'
+ruby '2.3.1'
 
 gem 'puma'
 
-gem 'sinatra', github: 'sinatra/sinatra'
+gem 'sinatra'
 gem 'sinatra-contrib'
 
 gem 'sequel'
@@ -35,6 +35,7 @@ end
 group :development do
   gem 'dotenv'
   gem 'sqlite3'  # for doing data imports
+  gem 'foreman'
 end
 
 group :test do
