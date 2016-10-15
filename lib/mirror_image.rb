@@ -16,11 +16,26 @@ module MirrorImage
     return false unless type = FastImage.type(url)
     return false unless CONTENT_TYPES[type.to_sym]
 
-    obj = S3::BUCKET.objects.create("#{name}.#{type}", OpenURI.open_uri(url), acl: :public_read, content_type: CONTENT_TYPES[type.to_sym])
+    filename = "#{name}.#{type}"
+    puts "UPLOADIN"
 
-    obj.public_url.to_s
-  rescue
-    false
+    options = {
+      bucket: ENV['AWS_BUCKET'],
+      key: filename,
+      body: OpenURI.open_uri(url).read,
+      acl: 'public-read',
+      content_type: CONTENT_TYPES[type.to_sym]
+    }
+    puts options.inspect
+
+    obj = S3::CLIENT.put_object(options)
+
+    puts "UPLOADED"
+
+    "https://#{ENV['AWS_BUCKET']}.s3.amazonaws.com/#{filename}"
+  rescue Exception => error
+    puts error.inspect
+  #   false
   end
 
   extend self

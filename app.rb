@@ -337,7 +337,7 @@ module Flow
           if r['info']['image'] && S3::CLIENT
             fn = u.username.to_s + uid.to_s
             # Since it's not essential, we'll rescue this away if the upload fails
-            u.avatar_url = MirrorImage.mirror_image_to_s3(r['info']['image'], fn) rescue nil
+            u.avatar_url = MirrorImage.mirror_image_to_s3(r['info']['image'], fn)
           end
 
           u.save
