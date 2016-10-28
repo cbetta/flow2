@@ -26,10 +26,28 @@ EXTRA_STYLESHEETS = Config[:stylesheets]
 SITE_NAME = Config[:site_name] || ENV['SITE_NAME'] || "flow2"
 SITE_DESCRIPTION = Config[:site_description] || ENV['SITE_DESCRIPTION'] || "a linkflow site"
 BLACKLIST = File.readlines(File.join(__dir__, 'config', 'blacklist.txt')).select { |l| l =~ /^\w+/ }.map { |l| l.strip }
+FORCE_SSL = ENV['FORCE_SSL'] == 'true'
+ENABLE_LETSENCRYPT = ENV['ENABLE_LETSENCRYPT'] == 'true'
 
 module Flow
   class App < Sinatra::Base
     configure do
+
+      # enable letsencrypt
+      if production? && ENABLE_LETSENCRYPT
+        require 'letsencrypt-rails-heroku'
+        Letsencrypt.configure
+        use Letsencrypt::Middleware
+      end
+
+
+      # add SSL if specified
+      if production? && FORCE_SSL
+        require 'rack/ssl-enforcer'
+        use Rack::SslEnforcer
+      end
+
+
       # Rack middleware
       use Rack::Deflater
       use Rack::Session::Cookie,
@@ -133,7 +151,6 @@ module Flow
       redirect '/rss', 301 if params[:format].to_s == 'rss'    # Compatibility with older flow sites
 
       rate_limit requests: 50, within: 40
-
       @body_classes << 'index'
       determine_page
       @posts = Post.recent_from_offset(@offset)

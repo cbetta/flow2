@@ -1,5 +1,14 @@
 require 'sinatra/asset_pipeline/task'
 require 'rake/testtask'
+require 'rake/testtask'
+
+if ENV['ENABLE_LETSENCRYPT']
+  require 'letsencrypt-rails-heroku'
+  Letsencrypt.configure
+  spec = Gem::Specification.find_by_name 'letsencrypt-rails-heroku'
+  load "#{spec.gem_dir}/lib/tasks/letsencrypt.rake"
+end
+
 require './app'
 
 Sinatra::AssetPipeline::Task.define! Flow::App
@@ -23,7 +32,7 @@ desc "Delete all data in Redis"
 task :reset_redis do
 	puts "Are you REALLY SURE? Ctrl+C now if not."
 	STDIN.gets
-  Ohm.redis.call "FLUSHDB"
+  REDIS.flushall
   puts "Redis database flushed"
 end
 

@@ -150,6 +150,21 @@ Then to force a rebuild of the app slug thereafter:
     scp /tmp/localdbname.dump wherever@you.want # or use S3
     heroku pgbackups:restore DATABASE 'http://url.goes.here/localdbname.dump'
 
+### Setting up autorenewing SSL certificates with Letsencrypt on Heroku
+
+Flow2 ships with built in Heroku SSL support, allowing you to roll out free SSL to your app using Heroku SNI SSL and free Letsencrypt certificates.
+
+To enable SSL:
+
+1. Ensure your app and running on Heroku on either a Hobby or Professional dyno
+2. Set up the [custom domain](https://devcenter.heroku.com/articles/custom-domains) you want to use and point it at your application.
+3. Follow the instructions on [this page](https://github.com/pixielabs/letsencrypt-rails-heroku#configuring) to set up the `ACME_DOMAIN`, `ACME_EMAIL`, `HEROKU_TOKEN` and `HEROKU_APP` environment variables.
+4. Enable Letsencrypt: `heroku config:add ENABLE_LETSENCRYPT=true`
+5. Change the DNS for your custom domain to the new SSL endpoint. Run `heroku domains` to see your new DNS target.
+6. Once your domain resolves to the new DNS target make sure `https` works fine in your browser
+7. Turn your site to be SSL only by running `heroku config:add FORCE_SSL=true`
+8. Enable auto-renewing by adding [a scheduled task](https://github.com/pixielabs/letsencrypt-rails-heroku#adding-a-scheduled-task) using the [Heroku scheduler](https://elements.heroku.com/addons/scheduler).
+
 ## FAQs
 
 **Why is it built in Sinatra/not using Rails/written in such a weird way?** Because first and foremost, it's software for me, and I wanted to have fun building it. I develop in quite an idiosyncratic way as I don't develop software professionally, work in a team, and I just do what I want, the way I want. Nonetheless, I have tried to ensure the *result* is of a high quality as that's all I care about.
